@@ -147,9 +147,8 @@ get_header();
 
         <!-- Info Card -->
         <div class="pmp-info-card">
-            <div class="pmp-info-card-label"><?php _e('CLEAN WATER FOR', 'project-map-plugin'); ?></div>
-            <div class="pmp-info-card-value"><?php echo number_format($project->beneficiaries); ?>
-                <?php _e('people', 'project-map-plugin'); ?></div>
+            <div class="pmp-info-card-label"><?php _e('PEOPLE SERVED', 'project-map-plugin'); ?></div>
+            <div class="pmp-info-card-value"><?php echo number_format($project->beneficiaries); ?></div>
         </div>
 
         <!-- Scroll Indicator -->
