@@ -352,26 +352,35 @@
                 existingPopups[0].remove();
             }
 
-            new mapboxgl.Popup({
-                offset: [0, -10],
+            var popup = new mapboxgl.Popup({
+                offset: [0, -15],
                 closeButton: false,
-                maxWidth: '220px',
+                maxWidth: '240px',
                 anchor: 'bottom'
             })
                 .setLngLat(coordinates)
                 .setHTML(popupHTML)
                 .addTo(map);
+
+            // Pan map to ensure popup is visible
+            map.easeTo({
+                center: coordinates,
+                padding: { top: 150, bottom: 50, left: 50, right: 50 },
+                duration: 300
+            });
         } else {
             // Close existing Leaflet popups
             map.closePopup();
 
             L.popup({
-                maxWidth: 220,
-                minWidth: 200,
+                maxWidth: 240,
+                minWidth: 220,
                 closeButton: false,
-                offset: [0, -10],
+                offset: [0, -15],
                 autoPan: true,
-                autoPanPadding: [50, 50]
+                autoPanPadding: [80, 80],
+                autoPanPaddingTopLeft: [50, 120],
+                autoPanPaddingBottomRight: [50, 50]
             })
                 .setLatLng([coordinates[1], coordinates[0]])
                 .setContent(popupHTML)
@@ -569,11 +578,13 @@
                 '</div>';
 
             marker.bindPopup(popupHTML, {
-                maxWidth: 220,
-                minWidth: 200,
+                maxWidth: 240,
+                minWidth: 220,
                 className: 'pmp-leaflet-popup',
                 autoPan: true,
-                autoPanPadding: [50, 50]
+                autoPanPadding: [80, 80],
+                autoPanPaddingTopLeft: [50, 120],
+                autoPanPaddingBottomRight: [50, 50]
             });
 
             // No longer attaching click event to open modal directly

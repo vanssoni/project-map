@@ -41,7 +41,7 @@ $button_text_color = get_option('pmp_button_text_color', '#2d2d2d');
     <!-- Loading Screen -->
     <div class="pmp-loading-screen" id="pmp-loading">
         <div class="pmp-loading-content">
-            <div class="pmp-water-drop">💧</div>
+            <div class="pmp-loader-icon">🌍</div>
             <p><?php _e('Loading projects...', 'project-map-plugin'); ?></p>
         </div>
     </div>
@@ -51,7 +51,7 @@ $button_text_color = get_option('pmp_button_text_color', '#2d2d2d');
         <div class="pmp-header-content">
             <!-- Brand -->
             <div class="pmp-brand">
-                <div class="pmp-logo">💧</div>
+                <div class="pmp-logo">🌍</div>
                 <div class="pmp-brand-text">
                     <h2 class="pmp-title"><?php _e('Project Map', 'project-map-plugin'); ?></h2>
                     <p class="pmp-last-updated"><?php _e('Last updated:', 'project-map-plugin'); ?> <?php echo date_i18n(get_option('date_format')); ?></p>

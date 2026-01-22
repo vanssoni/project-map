@@ -131,7 +131,7 @@ get_header();
 
         <!-- Project Header Overlay -->
         <div class="pmp-project-header">
-            <div class="pmp-project-marker">💧</div>
+            <div class="pmp-project-marker">📍</div>
             <h1 class="pmp-project-title"><?php echo esc_html($project->village_name); ?></h1>
             <div class="pmp-project-location">
                 <?php if ($project->country_flag): ?>

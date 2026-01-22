@@ -214,6 +214,39 @@ if (isset($_GET['edit'])) {
                 </div>
             </div>
         </div>
+
+        <!-- Documentation -->
+        <div class="pmp-admin-card pmp-admin-card-full">
+            <div class="pmp-card-header">
+                <h2><span class="dashicons dashicons-book" style="margin-right: 8px;"></span><?php _e('How to Use Project Type IDs', 'project-map-plugin'); ?></h2>
+            </div>
+            <div class="pmp-card-body">
+                <div class="pmp-doc-grid">
+                    <div class="pmp-doc-item">
+                        <h3><?php _e('Shortcode Usage', 'project-map-plugin'); ?></h3>
+                        <p><?php _e('Use the ID from the table above to filter projects by type:', 'project-map-plugin'); ?></p>
+                        <table class="pmp-doc-table">
+                            <tr>
+                                <td><code>[project_map project_type="1"]</code></td>
+                                <td><?php _e('Show only projects of type with ID 1', 'project-map-plugin'); ?></td>
+                            </tr>
+                            <tr>
+                                <td><code>[project_map project_type="2" show_filters="false"]</code></td>
+                                <td><?php _e('Show type ID 2 without filter controls', 'project-map-plugin'); ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="pmp-doc-item">
+                        <h3><?php _e('Tips', 'project-map-plugin'); ?></h3>
+                        <ul class="pmp-doc-list">
+                            <li><?php _e('The ID is automatically assigned when you create a new project type', 'project-map-plugin'); ?></li>
+                            <li><?php _e('IDs remain constant even if you rename the project type', 'project-map-plugin'); ?></li>
+                            <li><?php _e('Descriptions appear on individual project report pages', 'project-map-plugin'); ?></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -275,6 +308,67 @@ if (isset($_GET['edit'])) {
 
 @media (max-width: 1200px) {
     .pmp-admin-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pmp-admin-card-full {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+}
+
+.pmp-doc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.pmp-doc-item h3 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.pmp-doc-item p {
+    margin: 0 0 12px 0;
+    color: #50575e;
+}
+
+.pmp-doc-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pmp-doc-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+}
+
+.pmp-doc-table td:first-child {
+    width: 45%;
+}
+
+.pmp-doc-table code {
+    background: #f0f0f1;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.pmp-doc-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.pmp-doc-list li {
+    margin-bottom: 8px;
+    color: #50575e;
+    font-size: 13px;
+}
+
+@media (max-width: 782px) {
+    .pmp-doc-grid {
         grid-template-columns: 1fr;
     }
 }

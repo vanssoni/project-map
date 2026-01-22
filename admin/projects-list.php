@@ -124,33 +124,58 @@ $stats = $wpdb->get_row("SELECT COUNT(*) as total, SUM(beneficiaries) as benefic
         </div>
     </div>
 
-    <!-- Shortcode Information Box -->
-    <div class="pmp-info-box">
-        <h3><span class="dashicons dashicons-shortcode"></span> <?php _e('Shortcode Usage', 'project-map-plugin'); ?></h3>
-        <div class="pmp-info-content">
-            <p><?php _e('Use the following shortcodes to display the project map:', 'project-map-plugin'); ?></p>
-            <table class="pmp-shortcode-table">
-                <tr>
-                    <td><code>[project_map]</code></td>
-                    <td><?php _e('Display all projects on the map', 'project-map-plugin'); ?></td>
-                </tr>
-                <tr>
-                    <td><code>[project_map country="India"]</code></td>
-                    <td><?php _e('Display projects filtered by country', 'project-map-plugin'); ?></td>
-                </tr>
-                <tr>
-                    <td><code>[project_map solution_type="1"]</code></td>
-                    <td><?php _e('Display projects filtered by solution type ID', 'project-map-plugin'); ?></td>
-                </tr>
-                <tr>
-                    <td><code>[project_map show_filters="false"]</code></td>
-                    <td><?php _e('Hide filter dropdowns', 'project-map-plugin'); ?></td>
-                </tr>
-                <tr>
-                    <td><code>[project_map height="600px"]</code></td>
-                    <td><?php _e('Set custom map height', 'project-map-plugin'); ?></td>
-                </tr>
-            </table>
+    <!-- Documentation -->
+    <div class="pmp-documentation-box">
+        <h3><span class="dashicons dashicons-book"></span> <?php _e('Documentation', 'project-map-plugin'); ?></h3>
+        <div class="pmp-doc-grid">
+            <div class="pmp-doc-item">
+                <h4><?php _e('Shortcodes', 'project-map-plugin'); ?></h4>
+                <table class="pmp-doc-table">
+                    <tr>
+                        <td><code>[project_map]</code></td>
+                        <td><?php _e('Display the full project map', 'project-map-plugin'); ?></td>
+                    </tr>
+                    <tr>
+                        <td><code>[project_map country="India"]</code></td>
+                        <td><?php _e('Filter by country name', 'project-map-plugin'); ?></td>
+                    </tr>
+                    <tr>
+                        <td><code>[project_map project_type="1"]</code></td>
+                        <td><?php _e('Filter by project type ID', 'project-map-plugin'); ?></td>
+                    </tr>
+                    <tr>
+                        <td><code>[project_map solution_type="1"]</code></td>
+                        <td><?php _e('Filter by solution type ID', 'project-map-plugin'); ?></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="pmp-doc-item">
+                <h4><?php _e('Display Options', 'project-map-plugin'); ?></h4>
+                <table class="pmp-doc-table">
+                    <tr>
+                        <td><code>[project_map show_filters="false"]</code></td>
+                        <td><?php _e('Hide filter controls', 'project-map-plugin'); ?></td>
+                    </tr>
+                    <tr>
+                        <td><code>[project_map show_stats="false"]</code></td>
+                        <td><?php _e('Hide statistics', 'project-map-plugin'); ?></td>
+                    </tr>
+                    <tr>
+                        <td><code>[project_map show_search="false"]</code></td>
+                        <td><?php _e('Hide search button', 'project-map-plugin'); ?></td>
+                    </tr>
+                    <tr>
+                        <td><code>[project_map height="600px"]</code></td>
+                        <td><?php _e('Custom map height', 'project-map-plugin'); ?></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="pmp-doc-item">
+                <h4><?php _e('Project Report URLs', 'project-map-plugin'); ?></h4>
+                <p><?php _e('Individual project reports are accessible at:', 'project-map-plugin'); ?></p>
+                <code class="pmp-url-code"><?php echo home_url('/project-report/{project_id}'); ?></code>
+                <p class="description"><?php _e('Replace {project_id} with the actual project ID number.', 'project-map-plugin'); ?></p>
+            </div>
         </div>
     </div>
 
@@ -306,3 +331,93 @@ $stats = $wpdb->get_row("SELECT COUNT(*) as total, SUM(beneficiaries) as benefic
         </div>
     <?php endif; ?>
 </div>
+
+<style>
+/* Documentation Box */
+.pmp-documentation-box {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.pmp-documentation-box h3 {
+    margin: 0 0 20px 0;
+    padding: 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #1d2327;
+}
+
+.pmp-documentation-box h3 .dashicons {
+    color: #2271b1;
+}
+
+.pmp-doc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+.pmp-doc-item h4 {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: #1d2327;
+    font-weight: 600;
+}
+
+.pmp-doc-item p {
+    margin: 0 0 10px 0;
+    color: #50575e;
+    font-size: 13px;
+}
+
+.pmp-doc-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pmp-doc-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f1;
+    font-size: 12px;
+    vertical-align: top;
+}
+
+.pmp-doc-table td:first-child {
+    width: 55%;
+}
+
+.pmp-doc-table code {
+    background: #f0f0f1;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.pmp-url-code {
+    display: block;
+    background: #f0f0f1;
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 10px;
+    word-break: break-all;
+}
+
+@media (max-width: 1200px) {
+    .pmp-doc-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 782px) {
+    .pmp-doc-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

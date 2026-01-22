@@ -21,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pmp_settings_nonce'])
     update_option('pmp_map_style', sanitize_text_field($_POST['map_style']));
     update_option('pmp_osm_style', sanitize_text_field($_POST['osm_style']));
     update_option('pmp_enable_mapbox', isset($_POST['enable_mapbox']) ? '1' : '0');
-    update_option('pmp_marker_color', sanitize_hex_color($_POST['marker_color']));
 
     // Color customization settings
     update_option('pmp_header_bg_color', sanitize_hex_color($_POST['header_bg_color']));
@@ -37,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pmp_settings_nonce'])
 $mapbox_token = get_option('pmp_mapbox_token', '');
 $map_style = get_option('pmp_map_style', 'dark-v11');
 $enable_mapbox = get_option('pmp_enable_mapbox', '0');
-$marker_color = get_option('pmp_marker_color', '#ffc220');
 
 // Color customization settings
 $header_bg_color = get_option('pmp_header_bg_color', '#1d1d1d');
@@ -201,11 +199,12 @@ $map_styles = ($enable_mapbox == '1') ? $mapbox_styles : $osm_styles;
                     <!-- Popup Preview -->
                     <div class="pmp-preview-popup" id="pmp-color-preview">
                         <div class="pmp-preview-header" id="preview-header">
-                            <span><?php _e('Project Name', 'project-map-plugin'); ?></span>
+                            <span><?php _e('Village Name, Country', 'project-map-plugin'); ?></span>
                         </div>
                         <div class="pmp-preview-body">
-                            <p><?php _e('Sample content...', 'project-map-plugin'); ?></p>
-                            <button class="pmp-preview-button" id="preview-button"><?php _e('VIEW REPORT', 'project-map-plugin'); ?></button>
+                            <div class="pmp-preview-image"><?php _e('Project Image', 'project-map-plugin'); ?></div>
+                            <p><?php _e('Location details and project information will appear here...', 'project-map-plugin'); ?></p>
+                            <button class="pmp-preview-button" id="preview-button"><?php _e('VIEW FULL REPORT', 'project-map-plugin'); ?></button>
                         </div>
                     </div>
                 </div>
@@ -304,74 +303,93 @@ $map_styles = ($enable_mapbox == '1') ? $mapbox_styles : $osm_styles;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    padding: 20px;
+    background: #e8e8e8;
+    border-radius: 8px;
 }
 
 .pmp-preview-marker {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     background-color: <?php echo esc_attr($accent_color); ?>;
     border-radius: 50%;
     border: 4px solid #fff;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     position: relative;
 }
 
 .pmp-preview-marker::after {
     content: '';
     position: absolute;
-    bottom: -8px;
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 8px solid <?php echo esc_attr($accent_color); ?>;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 10px solid <?php echo esc_attr($accent_color); ?>;
 }
 
 .pmp-preview-marker-label {
-    font-size: 11px;
-    color: #666;
-    font-weight: 500;
+    font-size: 12px;
+    color: #555;
+    font-weight: 600;
 }
 
 .pmp-preview-popup {
-    max-width: 220px;
+    width: 280px;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
 .pmp-preview-header {
     background-color: <?php echo esc_attr($header_bg_color); ?>;
     color: <?php echo esc_attr($header_text_color); ?>;
-    padding: 12px 15px;
+    padding: 18px 20px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 16px;
 }
 
 .pmp-preview-body {
     background: #fff;
-    padding: 15px;
+    padding: 20px;
+}
+
+.pmp-preview-image {
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+    border-radius: 6px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 12px;
 }
 
 .pmp-preview-body p {
-    margin: 0 0 12px 0;
+    margin: 0 0 15px 0;
     color: #666;
-    font-size: 12px;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .pmp-preview-button {
     background-color: <?php echo esc_attr($accent_color); ?>;
     color: <?php echo esc_attr($button_text_color); ?>;
     border: none;
-    padding: 10px 16px;
-    border-radius: 4px;
+    padding: 12px 20px;
+    border-radius: 6px;
     font-weight: 600;
     cursor: pointer;
     width: 100%;
-    font-size: 11px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 @media (max-width: 600px) {
@@ -400,6 +418,17 @@ jQuery(document).ready(function($) {
             'background-color': accentColor,
             'color': buttonText
         });
+
+        // Update marker preview
+        $('#preview-marker').css('background-color', accentColor);
+        // Update marker pointer (triangle) using a pseudo-element workaround
+        var markerStyle = document.getElementById('pmp-marker-style');
+        if (!markerStyle) {
+            markerStyle = document.createElement('style');
+            markerStyle.id = 'pmp-marker-style';
+            document.head.appendChild(markerStyle);
+        }
+        markerStyle.textContent = '.pmp-preview-marker::after { border-top-color: ' + accentColor + ' !important; }';
     }
 
     $('#header_bg_color, #header_text_color, #accent_color, #button_text_color').on('input change', updateColorPreview);

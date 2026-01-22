@@ -212,5 +212,114 @@ if (isset($_GET['edit'])) {
                 </tbody>
             </table>
         </div>
+
+        <!-- Documentation -->
+        <div class="pmp-documentation-section">
+            <h2><span class="dashicons dashicons-book"></span> <?php _e('How to Use Solution Type IDs', 'project-map-plugin'); ?></h2>
+            <div class="pmp-doc-grid">
+                <div class="pmp-doc-item">
+                    <h3><?php _e('Shortcode Usage', 'project-map-plugin'); ?></h3>
+                    <p><?php _e('Use the ID from the table above to filter projects by solution type:', 'project-map-plugin'); ?></p>
+                    <table class="pmp-doc-table">
+                        <tr>
+                            <td><code>[project_map solution_type="1"]</code></td>
+                            <td><?php _e('Show only projects with solution type ID 1', 'project-map-plugin'); ?></td>
+                        </tr>
+                        <tr>
+                            <td><code>[project_map solution_type="3" country="India"]</code></td>
+                            <td><?php _e('Combine with country filter', 'project-map-plugin'); ?></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="pmp-doc-item">
+                    <h3><?php _e('Tips', 'project-map-plugin'); ?></h3>
+                    <ul class="pmp-doc-list">
+                        <li><?php _e('The ID is automatically assigned when you create a new solution type', 'project-map-plugin'); ?></li>
+                        <li><?php _e('IDs remain constant even if you rename the solution type', 'project-map-plugin'); ?></li>
+                        <li><?php _e('Descriptions appear on individual project report pages', 'project-map-plugin'); ?></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+.pmp-documentation-section {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    margin-top: 20px;
+    grid-column: 1 / -1;
+}
+
+.pmp-documentation-section h2 {
+    margin: 0 0 20px 0;
+    padding: 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pmp-documentation-section h2 .dashicons {
+    color: #2271b1;
+}
+
+.pmp-doc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.pmp-doc-item h3 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.pmp-doc-item p {
+    margin: 0 0 12px 0;
+    color: #50575e;
+}
+
+.pmp-doc-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pmp-doc-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+}
+
+.pmp-doc-table td:first-child {
+    width: 45%;
+}
+
+.pmp-doc-table code {
+    background: #f0f0f1;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.pmp-doc-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.pmp-doc-list li {
+    margin-bottom: 8px;
+    color: #50575e;
+    font-size: 13px;
+}
+
+@media (max-width: 782px) {
+    .pmp-doc-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
