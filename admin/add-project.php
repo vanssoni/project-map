@@ -66,6 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pmp_project_nonce']))
     if ($editing) {
         $result = $wpdb->update($projects_table, $data, array('id' => $id), $format, array('%d'));
         if ($result !== false) {
+            // Clear project cache for fresh data on map
+            ProjectMapPlugin::get_instance()->clear_project_cache();
             $message = __('Project updated successfully.', 'project-map-plugin');
             $message_type = 'success';
             // Refresh project data
@@ -77,6 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pmp_project_nonce']))
     } else {
         $result = $wpdb->insert($projects_table, $data, $format);
         if ($result) {
+            // Clear project cache for fresh data on map
+            ProjectMapPlugin::get_instance()->clear_project_cache();
             $new_id = $wpdb->insert_id;
             wp_redirect(admin_url('admin.php?page=pmp-add-project&id=' . $new_id . '&created=1'));
             exit;

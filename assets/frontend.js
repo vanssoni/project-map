@@ -8,6 +8,7 @@
     // Global variables
     var map;
     var projectsData = [];
+    var markerClusterGroup = null; // For Leaflet MarkerCluster
     var isInitialLoad = true; // Track if this is the first load
     var currentFilter = {
         country: '',
@@ -338,9 +339,9 @@
 
         var popupHTML = '<div class="pmp-marker-preview">' +
             '<button class="pmp-marker-popup-close" onclick="pmpCloseMarkerPopup()">✕</button>' +
-            '<img src="' + projectImage + '" alt="' + props.name + '" onerror="this.src=\'' + (pmp_ajax.placeholder_image || '') + '\'">' +
+            '<img class="pmp-marker-project-image" src="' + projectImage + '" alt="' + props.name + '" onerror="this.src=\'' + (pmp_ajax.placeholder_image || '') + '\'">' +
             '<h3>' + props.name + '</h3>' +
-            '<p>' + props.countryFlag + ' ' + props.country + '</p>' +
+            '<p class="pmp-marker-country"><span class="pmp-marker-flag">' + props.countryFlag + '</span> ' + props.country + '</p>' +
             '<p class="pmp-marker-served">' + parseInt(props.peopleServed).toLocaleString() + ' people served</p>' +
             '<button onclick="pmpOpenProjectPopup(\'' + props.id + '\')" style="background-color: ' + accentColor + '; color: ' + buttonTextColor + ';">VIEW DETAILS</button>' +
             '</div>';
@@ -537,22 +538,50 @@
     }
 
     /**
-     * Add markers to Leaflet map
+     * Add markers to Leaflet map using MarkerCluster for performance (optimized for 10,000+ projects)
      */
     function addMarkersToMapLeaflet() {
         if (!map || pmp_ajax.use_mapbox) return;
-        if (projectsData.length === 0) return;
 
-        // Clear existing markers
-        if (map.eachLayer) {
-            map.eachLayer(function (layer) {
-                if (layer instanceof L.Marker) {
-                    map.removeLayer(layer);
-                }
-            });
+        // Remove existing cluster group
+        if (markerClusterGroup) {
+            map.removeLayer(markerClusterGroup);
+            markerClusterGroup = null;
         }
 
+        if (projectsData.length === 0) return;
+
         var markerColor = pmp_ajax.accent_color || '#ffc220';
+        var accentColor = pmp_ajax.accent_color || '#ffc220';
+        var buttonTextColor = pmp_ajax.button_text_color || '#2d2d2d';
+
+        // Create marker cluster group with optimized settings for large datasets
+        markerClusterGroup = L.markerClusterGroup({
+            chunkedLoading: true, // Load markers in chunks for better performance
+            chunkInterval: 200,   // Interval between chunks
+            chunkDelay: 50,       // Delay between chunk processing
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            maxClusterRadius: parseInt(pmp_ajax.cluster_radius) || 50,
+            disableClusteringAtZoom: 16,
+            // Custom cluster icon
+            iconCreateFunction: function(cluster) {
+                var count = cluster.getChildCount();
+                var size = count < 10 ? 'small' : count < 100 ? 'medium' : 'large';
+                var dimension = size === 'small' ? 36 : size === 'medium' ? 44 : 52;
+                var fontSize = size === 'small' ? 12 : size === 'medium' ? 14 : 16;
+
+                return L.divIcon({
+                    html: '<div style="background-color: ' + markerColor + '; color: ' + buttonTextColor + '; width: ' + dimension + 'px; height: ' + dimension + 'px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: ' + fontSize + 'px; box-shadow: 0 3px 10px rgba(0,0,0,0.3); border: 3px solid #fff;">' + count + '</div>',
+                    className: 'pmp-cluster-icon',
+                    iconSize: [dimension, dimension]
+                });
+            }
+        });
+
+        // Create markers in batch for better performance
+        var markers = [];
 
         projectsData.forEach(function (project) {
             var marker = L.marker([project.coordinates[1], project.coordinates[0]], {
@@ -564,34 +593,42 @@
                 })
             });
 
-            var accentColor = pmp_ajax.accent_color || '#ffc220';
-            var buttonTextColor = pmp_ajax.button_text_color || '#2d2d2d';
-            var projectImage = project.image || pmp_ajax.placeholder_image || '';
+            // Store project data on marker for lazy popup creation
+            marker.projectData = project;
 
-            var popupHTML = '<div class="pmp-marker-preview">' +
-                '<button class="pmp-marker-popup-close" onclick="pmpCloseMarkerPopup()">✕</button>' +
-                '<img src="' + projectImage + '" alt="' + project.name + '" onerror="this.src=\'' + (pmp_ajax.placeholder_image || '') + '\'">' +
-                '<h3>' + project.name + '</h3>' +
-                '<p>' + (project.countryFlag || '') + ' ' + project.country + '</p>' +
-                '<p class="pmp-marker-served">' + parseInt(project.peopleServed).toLocaleString() + ' people served</p>' +
-                '<button onclick="pmpOpenProjectPopup(\'' + project.id + '\')" style="background-color: ' + accentColor + '; color: ' + buttonTextColor + ';">VIEW DETAILS</button>' +
-                '</div>';
+            // Lazy load popup content on click for better performance
+            marker.on('click', function(e) {
+                var proj = this.projectData;
+                var projectImage = proj.image || pmp_ajax.placeholder_image || '';
 
-            marker.bindPopup(popupHTML, {
-                maxWidth: 240,
-                minWidth: 220,
-                className: 'pmp-leaflet-popup',
-                autoPan: true,
-                autoPanPadding: [80, 80],
-                autoPanPaddingTopLeft: [50, 120],
-                autoPanPaddingBottomRight: [50, 50]
+                var popupHTML = '<div class="pmp-marker-preview">' +
+                    '<button class="pmp-marker-popup-close" onclick="pmpCloseMarkerPopup()">✕</button>' +
+                    '<img class="pmp-marker-project-image" src="' + projectImage + '" alt="' + proj.name + '" onerror="this.src=\'' + (pmp_ajax.placeholder_image || '') + '\'">' +
+                    '<h3>' + proj.name + '</h3>' +
+                    '<p class="pmp-marker-country"><span class="pmp-marker-flag">' + (proj.countryFlag || '') + '</span> ' + proj.country + '</p>' +
+                    '<p class="pmp-marker-served">' + parseInt(proj.peopleServed).toLocaleString() + ' people served</p>' +
+                    '<button onclick="pmpOpenProjectPopup(\'' + proj.id + '\')" style="background-color: ' + accentColor + '; color: ' + buttonTextColor + ';">VIEW DETAILS</button>' +
+                    '</div>';
+
+                this.bindPopup(popupHTML, {
+                    maxWidth: 240,
+                    minWidth: 220,
+                    className: 'pmp-leaflet-popup',
+                    autoPan: true,
+                    autoPanPadding: [80, 80],
+                    autoPanPaddingTopLeft: [50, 120],
+                    autoPanPaddingBottomRight: [50, 50]
+                }).openPopup();
             });
 
-            // No longer attaching click event to open modal directly
-            // The popup has a VIEW DETAILS button that opens the modal
-
-            marker.addTo(map);
+            markers.push(marker);
         });
+
+        // Add all markers to cluster group at once
+        markerClusterGroup.addLayers(markers);
+
+        // Add cluster group to map
+        map.addLayer(markerClusterGroup);
     }
 
     /**

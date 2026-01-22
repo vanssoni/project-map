@@ -123,7 +123,7 @@ class ProjectMapPlugin
             KEY project_type_id (project_type_id)
         ) $charset_collate;";
 
-        // Projects table
+        // Projects table - optimized with composite indexes for 10,000+ projects
         $projects_table = $wpdb->prefix . 'pmp_projects';
         $sql_projects = "CREATE TABLE $projects_table (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -149,7 +149,11 @@ class ProjectMapPlugin
             KEY country (country),
             KEY project_type_id (project_type_id),
             KEY solution_type_id (solution_type_id),
-            KEY status (status)
+            KEY status (status),
+            KEY status_country (status, country),
+            KEY status_project_type (status, project_type_id),
+            KEY status_solution_type (status, solution_type_id),
+            KEY village_search (village_name(50))
         ) $charset_collate;";
 
         // Countries table for reference
@@ -489,6 +493,10 @@ class ProjectMapPlugin
             // Leaflet (OpenStreetMap)
             wp_enqueue_style('leaflet-css', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', array(), '1.9.4');
             wp_enqueue_script('leaflet-js', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', array(), '1.9.4', true);
+            // Leaflet MarkerCluster for efficient clustering (optimized for 10,000+ markers)
+            wp_enqueue_style('leaflet-markercluster-css', 'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css', array('leaflet-css'), '1.4.1');
+            wp_enqueue_style('leaflet-markercluster-default-css', 'https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css', array('leaflet-markercluster-css'), '1.4.1');
+            wp_enqueue_script('leaflet-markercluster-js', 'https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js', array('leaflet-js'), '1.4.1', true);
         }
 
         // Plugin frontend assets
@@ -774,7 +782,7 @@ class ProjectMapPlugin
         return $template;
     }
 
-    // AJAX: Get projects for map
+    // AJAX: Get projects for map - Optimized for 10,000+ projects
     public function ajax_get_projects()
     {
         check_ajax_referer('pmp_nonce', 'nonce');
@@ -789,6 +797,16 @@ class ProjectMapPlugin
         $project_type = isset($_POST['project_type']) ? intval($_POST['project_type']) : 0;
         $solution_type = isset($_POST['solution_type']) ? intval($_POST['solution_type']) : 0;
         $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+
+        // Generate cache key based on filters
+        $cache_key = 'pmp_projects_' . md5($country . '_' . $project_type . '_' . $solution_type . '_' . $search);
+        $cached_data = get_transient($cache_key);
+
+        // Return cached data if available and no search (search results shouldn't be cached long)
+        if ($cached_data !== false && empty($search)) {
+            wp_send_json_success($cached_data);
+            return;
+        }
 
         $where = "WHERE p.status = 'publish'";
         $params = array();
@@ -809,20 +827,22 @@ class ProjectMapPlugin
         }
 
         if ($search) {
-            $where .= " AND (p.village_name LIKE %s OR p.country LIKE %s OR p.description LIKE %s)";
+            $where .= " AND (p.village_name LIKE %s OR p.country LIKE %s)";
             $search_term = '%' . $wpdb->esc_like($search) . '%';
-            $params[] = $search_term;
             $params[] = $search_term;
             $params[] = $search_term;
         }
 
-        $sql = "SELECT p.*, st.name as solution_type_name, pt.name as project_type_name, pt.icon as project_type_icon, c.flag as country_flag
+        // Optimized query - only select fields needed for map display
+        // Avoid selecting large text fields like description for initial load
+        $sql = "SELECT p.id, p.village_name, p.project_number, p.country, p.gps_latitude, p.gps_longitude,
+                       p.beneficiaries, p.completion_month, p.completion_year, p.in_honour_of, p.featured_image_id,
+                       st.name as solution_type_name, pt.name as project_type_name, pt.icon as project_type_icon, c.flag as country_flag
                 FROM $table p
                 LEFT JOIN $types_table st ON p.solution_type_id = st.id
                 LEFT JOIN $project_types_table pt ON p.project_type_id = pt.id
                 LEFT JOIN $countries_table c ON p.country = c.name
-                $where
-                ORDER BY p.created_at DESC";
+                $where";
 
         if (!empty($params)) {
             $projects = $wpdb->get_results($wpdb->prepare($sql, $params));
@@ -830,36 +850,63 @@ class ProjectMapPlugin
             $projects = $wpdb->get_results($sql);
         }
 
-        // Format projects for frontend
-        $formatted = array();
+        // Batch get all featured image URLs at once for performance
+        $image_ids = array();
         foreach ($projects as $project) {
-            $featured_image = $project->featured_image_id ? wp_get_attachment_url($project->featured_image_id) : '';
+            if ($project->featured_image_id) {
+                $image_ids[] = intval($project->featured_image_id);
+            }
+        }
+
+        $image_urls = array();
+        if (!empty($image_ids)) {
+            $image_ids_str = implode(',', $image_ids);
+            $images = $wpdb->get_results(
+                "SELECT ID, guid FROM {$wpdb->posts} WHERE ID IN ($image_ids_str)",
+                OBJECT_K
+            );
+            foreach ($images as $id => $img) {
+                $image_urls[$id] = $img->guid;
+            }
+        }
+
+        // Format projects for frontend - minimal data for performance
+        $formatted = array();
+        $placeholder = PMP_PLUGIN_URL . 'assets/images/placeholder.jpg';
+
+        foreach ($projects as $project) {
+            $featured_image = isset($image_urls[$project->featured_image_id])
+                ? $image_urls[$project->featured_image_id]
+                : $placeholder;
 
             $formatted[] = array(
-                'id' => $project->id,
+                'id' => (int)$project->id,
                 'name' => $project->village_name,
-                'projectNumber' => $project->project_number,
                 'country' => $project->country,
                 'countryFlag' => $project->country_flag ?: '',
-                'coordinates' => array(floatval($project->gps_longitude), floatval($project->gps_latitude)),
-                'peopleServed' => intval($project->beneficiaries),
+                'coordinates' => array((float)$project->gps_longitude, (float)$project->gps_latitude),
+                'peopleServed' => (int)$project->beneficiaries,
                 'date' => $this->format_completion_date($project->completion_month, $project->completion_year),
-                'image' => $featured_image ?: PMP_PLUGIN_URL . 'assets/images/placeholder.jpg',
-                'projectType' => $project->project_type_name ?: '',
-                'projectTypeIcon' => $project->project_type_icon ?: '📍',
+                'image' => $featured_image,
                 'solutionType' => $project->solution_type_name ?: '',
-                'fundedBy' => $project->in_honour_of ?: 'Anonymous Donors',
-                'description' => wp_trim_words($project->description, 30)
+                'fundedBy' => $project->in_honour_of ?: 'Anonymous Donors'
             );
         }
 
         // Get statistics
         $stats = $this->get_statistics($country, $project_type, $solution_type);
 
-        wp_send_json_success(array(
+        $response_data = array(
             'projects' => $formatted,
             'stats' => $stats
-        ));
+        );
+
+        // Cache for 5 minutes (300 seconds) if not a search query
+        if (empty($search)) {
+            set_transient($cache_key, $response_data, 300);
+        }
+
+        wp_send_json_success($response_data);
     }
 
     private function format_completion_date($month, $year)
@@ -1041,6 +1088,9 @@ class ProjectMapPlugin
         }
 
         fclose($handle);
+
+        // Clear project cache after import
+        $this->clear_project_cache();
 
         wp_send_json_success(array(
             'imported' => $imported,
@@ -1486,10 +1536,28 @@ class ProjectMapPlugin
         $result = $wpdb->delete($table, array('id' => $id), array('%d'));
 
         if ($result) {
+            // Clear project cache
+            $this->clear_project_cache();
             wp_send_json_success(__('Project deleted successfully', 'project-map-plugin'));
         } else {
             wp_send_json_error(__('Failed to delete project', 'project-map-plugin'));
         }
+    }
+
+    /**
+     * Clear all project-related transient caches
+     * Called when projects are added, updated, or deleted
+     */
+    public function clear_project_cache()
+    {
+        global $wpdb;
+
+        // Delete all transients that start with 'pmp_projects_'
+        $wpdb->query(
+            "DELETE FROM {$wpdb->options}
+             WHERE option_name LIKE '_transient_pmp_projects_%'
+             OR option_name LIKE '_transient_timeout_pmp_projects_%'"
+        );
     }
 
     // Helper: Get project by ID
