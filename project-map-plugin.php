@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 // Define plugin constants
 define('PMP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('PMP_PLUGIN_PATH', plugin_dir_path(__FILE__));
-define('PMP_VERSION', '1.0.3');
+define('PMP_VERSION', '1.1.0');
 
 class ProjectMapPlugin
 {
@@ -68,9 +68,13 @@ class ProjectMapPlugin
     {
         load_plugin_textdomain('project-map-plugin', false, dirname(plugin_basename(__FILE__)) . '/languages');
 
-        // Flush rewrite rules if version changed
+        // Update database schema and flush rewrite rules if version changed
         $stored_version = get_option('pmp_version', '0');
         if (version_compare($stored_version, PMP_VERSION, '<')) {
+            // Update database tables (adds new indexes for performance)
+            $this->create_database_tables();
+            // Clear any cached data
+            $this->clear_project_cache();
             flush_rewrite_rules();
             update_option('pmp_version', PMP_VERSION);
         }
@@ -506,22 +510,6 @@ class ProjectMapPlugin
         // Single project page assets
         if (get_query_var('pmp_project_id')) {
             wp_enqueue_style('pmp-single-project-css', PMP_PLUGIN_URL . 'assets/single-project.css', array(), PMP_VERSION);
-        }
-
-        // Check if Mapbox is enabled
-        $enable_mapbox = get_option('pmp_enable_mapbox', '0');
-        $mapbox_token = get_option('pmp_mapbox_token', '');
-        $use_mapbox = ($enable_mapbox == '1' && !empty($mapbox_token));
-
-        // Load appropriate map library
-        if ($use_mapbox) {
-            // Mapbox GL JS
-            wp_enqueue_style('mapbox-gl-css', 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css', array(), '2.15.0');
-            wp_enqueue_script('mapbox-gl-js', 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js', array(), '2.15.0', true);
-        } else {
-            // Leaflet (OpenStreetMap)
-            wp_enqueue_style('leaflet-css', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', array(), '1.9.4');
-            wp_enqueue_script('leaflet-js', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', array(), '1.9.4', true);
         }
 
         // Localize script

@@ -543,17 +543,31 @@
     function addMarkersToMapLeaflet() {
         if (!map || pmp_ajax.use_mapbox) return;
 
-        // Remove existing cluster group
+        // Remove existing cluster group or markers
         if (markerClusterGroup) {
             map.removeLayer(markerClusterGroup);
             markerClusterGroup = null;
         }
+
+        // Also clear any individual markers (fallback cleanup)
+        map.eachLayer(function (layer) {
+            if (layer instanceof L.Marker) {
+                map.removeLayer(layer);
+            }
+        });
 
         if (projectsData.length === 0) return;
 
         var markerColor = pmp_ajax.accent_color || '#ffc220';
         var accentColor = pmp_ajax.accent_color || '#ffc220';
         var buttonTextColor = pmp_ajax.button_text_color || '#2d2d2d';
+
+        // Check if MarkerCluster is available, fallback to simple markers if not
+        if (typeof L.markerClusterGroup !== 'function') {
+            console.warn('Leaflet.markercluster not loaded, using simple markers');
+            addSimpleMarkersLeaflet(markerColor, accentColor, buttonTextColor);
+            return;
+        }
 
         // Create marker cluster group with optimized settings for large datasets
         markerClusterGroup = L.markerClusterGroup({
@@ -629,6 +643,43 @@
 
         // Add cluster group to map
         map.addLayer(markerClusterGroup);
+    }
+
+    /**
+     * Fallback: Add simple markers without clustering (for when MarkerCluster isn't available)
+     */
+    function addSimpleMarkersLeaflet(markerColor, accentColor, buttonTextColor) {
+        projectsData.forEach(function (project) {
+            var marker = L.marker([project.coordinates[1], project.coordinates[0]], {
+                icon: L.divIcon({
+                    className: 'pmp-leaflet-marker',
+                    html: '<div style="background-color: ' + markerColor + '; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.4); cursor: pointer;"></div>',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                })
+            });
+
+            var projectImage = project.image || pmp_ajax.placeholder_image || '';
+
+            var popupHTML = '<div class="pmp-marker-preview">' +
+                '<button class="pmp-marker-popup-close" onclick="pmpCloseMarkerPopup()">✕</button>' +
+                '<img class="pmp-marker-project-image" src="' + projectImage + '" alt="' + project.name + '" onerror="this.src=\'' + (pmp_ajax.placeholder_image || '') + '\'">' +
+                '<h3>' + project.name + '</h3>' +
+                '<p class="pmp-marker-country"><span class="pmp-marker-flag">' + (project.countryFlag || '') + '</span> ' + project.country + '</p>' +
+                '<p class="pmp-marker-served">' + parseInt(project.peopleServed).toLocaleString() + ' people served</p>' +
+                '<button onclick="pmpOpenProjectPopup(\'' + project.id + '\')" style="background-color: ' + accentColor + '; color: ' + buttonTextColor + ';">VIEW DETAILS</button>' +
+                '</div>';
+
+            marker.bindPopup(popupHTML, {
+                maxWidth: 240,
+                minWidth: 220,
+                className: 'pmp-leaflet-popup',
+                autoPan: true,
+                autoPanPadding: [80, 80]
+            });
+
+            marker.addTo(map);
+        });
     }
 
     /**
