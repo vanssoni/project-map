@@ -78,6 +78,9 @@ $solution_type_desc = $project->solution_type_description ?? '';
 get_header();
 ?>
 
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
 <style>
     /* Override theme containers for full-page layout */
     body.pmp-single-project-page {
@@ -180,53 +183,69 @@ get_header();
                 </div>
             <?php endif; ?>
 
-            <!-- Project Stats -->
-            <div class="pmp-project-stats">
-                <div class="pmp-stat-row pmp-stat-row-large">
-                    <div class="pmp-stat-item">
-                        <div class="pmp-stat-label"><?php _e('PEOPLE SERVED', 'project-map-plugin'); ?></div>
-                        <div class="pmp-stat-value pmp-stat-value-large">
-                            <?php echo number_format($project->beneficiaries); ?></div>
+            <!-- Project Info Cards -->
+            <div class="pmp-info-cards">
+                <!-- Main Stat Card -->
+                <div class="pmp-info-main-card">
+                    <div class="pmp-info-main-icon">👥</div>
+                    <div class="pmp-info-main-content">
+                        <div class="pmp-info-main-label"><?php _e('PEOPLE SERVED', 'project-map-plugin'); ?></div>
+                        <div class="pmp-info-main-value"><?php echo number_format($project->beneficiaries); ?></div>
                     </div>
                 </div>
 
-                <div class="pmp-stat-row">
-                    <div class="pmp-stat-item">
-                        <div class="pmp-stat-label"><?php _e('THANKS TO', 'project-map-plugin'); ?></div>
-                        <div class="pmp-stat-value">
-                            <?php echo esc_html($project->in_honour_of ?: __('Anonymous Donors', 'project-map-plugin')); ?>
+                <!-- Info Grid -->
+                <div class="pmp-info-grid">
+                    <div class="pmp-info-item">
+                        <div class="pmp-info-icon">❤️</div>
+                        <div class="pmp-info-content">
+                            <div class="pmp-info-label"><?php _e('THANKS TO', 'project-map-plugin'); ?></div>
+                            <div class="pmp-info-value"><?php echo esc_html($project->in_honour_of ?: __('Anonymous Donors', 'project-map-plugin')); ?></div>
                         </div>
                     </div>
-                    <div class="pmp-stat-item">
-                        <div class="pmp-stat-label"><?php _e('PROJECT TYPE', 'project-map-plugin'); ?></div>
-                        <div class="pmp-stat-value">
-                            <?php echo esc_html($project->project_type_name ?: __('N/A', 'project-map-plugin')); ?>
+
+                    <div class="pmp-info-item">
+                        <div class="pmp-info-icon">📋</div>
+                        <div class="pmp-info-content">
+                            <div class="pmp-info-label"><?php _e('PROJECT TYPE', 'project-map-plugin'); ?></div>
+                            <div class="pmp-info-value"><?php echo esc_html($project->project_type_name ?: __('N/A', 'project-map-plugin')); ?></div>
+                        </div>
+                    </div>
+
+                    <div class="pmp-info-item">
+                        <div class="pmp-info-icon">⚙️</div>
+                        <div class="pmp-info-content">
+                            <div class="pmp-info-label"><?php _e('SOLUTION TYPE', 'project-map-plugin'); ?></div>
+                            <div class="pmp-info-value"><?php echo esc_html($project->solution_type_name ?: __('N/A', 'project-map-plugin')); ?></div>
+                        </div>
+                    </div>
+
+                    <div class="pmp-info-item">
+                        <div class="pmp-info-icon">📅</div>
+                        <div class="pmp-info-content">
+                            <div class="pmp-info-label"><?php _e('COMPLETED', 'project-map-plugin'); ?></div>
+                            <div class="pmp-info-value"><?php echo esc_html($completion_date ?: __('N/A', 'project-map-plugin')); ?></div>
+                        </div>
+                    </div>
+
+                    <?php if ($project->project_number): ?>
+                    <div class="pmp-info-item">
+                        <div class="pmp-info-icon">#️⃣</div>
+                        <div class="pmp-info-content">
+                            <div class="pmp-info-label"><?php _e('PROJECT NUMBER', 'project-map-plugin'); ?></div>
+                            <div class="pmp-info-value"><?php echo esc_html($project->project_number); ?></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="pmp-info-item">
+                        <div class="pmp-info-icon">📍</div>
+                        <div class="pmp-info-content">
+                            <div class="pmp-info-label"><?php _e('LOCATION', 'project-map-plugin'); ?></div>
+                            <div class="pmp-info-value"><?php echo esc_html($project->village_name . ', ' . $project->country); ?></div>
                         </div>
                     </div>
                 </div>
-
-                <div class="pmp-stat-row">
-                    <div class="pmp-stat-item">
-                        <div class="pmp-stat-label"><?php _e('SOLUTION TYPE', 'project-map-plugin'); ?></div>
-                        <div class="pmp-stat-value">
-                            <?php echo esc_html($project->solution_type_name ?: __('N/A', 'project-map-plugin')); ?>
-                        </div>
-                    </div>
-                    <div class="pmp-stat-item">
-                        <div class="pmp-stat-label"><?php _e('COMPLETED', 'project-map-plugin'); ?></div>
-                        <div class="pmp-stat-value">
-                            <?php echo esc_html($completion_date ?: __('N/A', 'project-map-plugin')); ?></div>
-                    </div>
-                </div>
-
-                <?php if ($project->project_number): ?>
-                    <div class="pmp-stat-row">
-                        <div class="pmp-stat-item">
-                            <div class="pmp-stat-label"><?php _e('PROJECT NUMBER', 'project-map-plugin'); ?></div>
-                            <div class="pmp-stat-value"><?php echo esc_html($project->project_number); ?></div>
-                        </div>
-                    </div>
-                <?php endif; ?>
             </div>
 
             <?php if ($project->description): ?>
@@ -264,12 +283,33 @@ get_header();
                 <!-- Image Gallery -->
                 <div class="pmp-project-gallery">
                     <h2><?php _e('Photo Gallery', 'project-map-plugin'); ?></h2>
-                    <div class="pmp-gallery-grid">
+
+                    <!-- Desktop Grid Gallery -->
+                    <div class="pmp-gallery-grid pmp-gallery-desktop">
                         <?php foreach ($gallery_images as $image): ?>
                             <div class="pmp-gallery-item">
                                 <img src="<?php echo esc_url($image); ?>" alt="" loading="lazy">
                             </div>
                         <?php endforeach; ?>
+                    </div>
+
+                    <!-- Mobile Slider Gallery (Swiper) -->
+                    <div class="pmp-gallery-slider pmp-gallery-mobile">
+                        <div class="swiper pmp-gallery-swiper">
+                            <div class="swiper-wrapper">
+                                <?php foreach ($gallery_images as $index => $image): ?>
+                                    <div class="swiper-slide">
+                                        <img src="<?php echo esc_url($image); ?>" alt="" loading="lazy">
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                        </div>
+                        <div class="pmp-gallery-counter">
+                            <span class="pmp-current-slide">1</span> / <span class="pmp-total-slides"><?php echo count($gallery_images); ?></span>
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>
@@ -320,7 +360,7 @@ get_header();
             }
 
             <?php if ($use_mapbox): ?>
-                // Initialize Mapbox 3D Map
+                // Initialize Mapbox 3D Map with satellite-streets style
                 if (typeof mapboxgl === 'undefined') {
                     console.error('Mapbox GL JS not loaded');
                     return;
@@ -330,11 +370,11 @@ get_header();
 
                 var map = new mapboxgl.Map({
                     container: 'pmp-detail-map',
-                    style: 'mapbox://styles/mapbox/satellite-v9',
+                    style: 'mapbox://styles/mapbox/satellite-streets-v12',
                     center: [<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>],
-                    zoom: 12,
-                    pitch: 0,
-                    bearing: 0,
+                    zoom: 14,
+                    pitch: 45,
+                    bearing: -15,
                     antialias: true,
                     interactive: false
                 });
@@ -350,6 +390,31 @@ get_header();
 
                     map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
 
+                    // Add 3D building extrusion
+                    var layers = map.getStyle().layers;
+                    var labelLayerId;
+                    for (var i = 0; i < layers.length; i++) {
+                        if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+                            labelLayerId = layers[i].id;
+                            break;
+                        }
+                    }
+
+                    map.addLayer({
+                        'id': '3d-buildings',
+                        'source': 'composite',
+                        'source-layer': 'building',
+                        'filter': ['==', 'extrude', 'true'],
+                        'type': 'fill-extrusion',
+                        'minzoom': 15,
+                        'paint': {
+                            'fill-extrusion-color': '#aaa',
+                            'fill-extrusion-height': ['get', 'height'],
+                            'fill-extrusion-base': ['get', 'min_height'],
+                            'fill-extrusion-opacity': 0.6
+                        }
+                    }, labelLayerId);
+
                     // Add sky atmosphere
                     map.addLayer({
                         'id': 'sky',
@@ -361,29 +426,33 @@ get_header();
                         }
                     });
 
-                    // Animate camera
+                    // Smooth flyTo animation with tilted camera
                     setTimeout(function () {
                         map.flyTo({
                             center: [<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>],
-                            zoom: 16,
-                            pitch: 60,
-                            bearing: 0,
-                            duration: 4000,
-                            essential: true
+                            zoom: 17,
+                            pitch: 65,
+                            bearing: 30,
+                            duration: 5000,
+                            essential: true,
+                            curve: 1.5,
+                            easing: function(t) {
+                                return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                            }
                         });
 
-                        // Start rotation after fly-in
+                        // Start smooth rotation after fly-in
                         setTimeout(function () {
-                            var rotationAngle = 0;
+                            var rotationAngle = 30;
                             function rotate() {
-                                rotationAngle += 0.15;
+                                rotationAngle += 0.08;
                                 if (rotationAngle >= 360) rotationAngle = 0;
                                 map.rotateTo(rotationAngle, { duration: 0 });
                                 requestAnimationFrame(rotate);
                             }
                             rotate();
-                        }, 4500);
-                    }, 500);
+                        }, 5500);
+                    }, 800);
                 });
 
                 map.on('error', function (e) {
@@ -507,6 +576,40 @@ get_header();
             // Fallback: copy to clipboard
             navigator.clipboard.writeText(window.location.href).then(function () {
                 alert('<?php echo esc_js(__('Link copied to clipboard!', 'project-map-plugin')); ?>');
+            });
+        }
+    });
+</script>
+
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    // Initialize Swiper Gallery
+    document.addEventListener('DOMContentLoaded', function() {
+        var gallerySwiper = document.querySelector('.pmp-gallery-swiper');
+        if (gallerySwiper) {
+            var swiper = new Swiper('.pmp-gallery-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 15,
+                loop: true,
+                grabCursor: true,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                    dynamicBullets: true
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev'
+                },
+                on: {
+                    slideChange: function() {
+                        var currentSlide = document.querySelector('.pmp-current-slide');
+                        if (currentSlide) {
+                            currentSlide.textContent = this.realIndex + 1;
+                        }
+                    }
+                }
             });
         }
     });
