@@ -143,6 +143,7 @@
     width: 100%;
     height: 100%;
     z-index: 1;
+    overflow: hidden;
 }
 
 #pmp-detail-map {
@@ -150,23 +151,52 @@
     height: 100%;
 }
 
-/* Mapbox Pin Marker */
-.pmp-mapbox-pin-marker {
-    cursor: pointer;
+/* Mapbox Marker - attached to map coordinates */
+.pmp-map-marker {
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* Prevent sub-pixel jittering */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    -webkit-font-smoothing: subpixel-antialiased;
 }
 
-/* Pin icon (shown during zoom) */
-.pmp-mapbox-pin-marker .pmp-pin-icon {
+/* Pin icon */
+.pmp-marker-pin svg {
     filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
     display: block;
 }
 
+/* Simple marker icon - Charity Water style */
+.pmp-marker-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Bubble marker */
 .pmp-marker-bubble {
-    background: var(--pmp-accent-color, #ffc220);
-    color: var(--pmp-button-text-color, #2d2d2d);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+.pmp-bubble-content {
     padding: 12px 20px;
     border-radius: 8px;
     text-align: center;
@@ -174,7 +204,7 @@
     white-space: nowrap;
 }
 
-.pmp-marker-label {
+.pmp-bubble-label {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 1px;
@@ -182,24 +212,57 @@
     opacity: 0.85;
 }
 
-.pmp-marker-value {
+.pmp-bubble-value {
     font-size: 18px;
     font-weight: 700;
     line-height: 1;
 }
 
-.pmp-marker-arrow {
+/* Bubble overlay - positioned near center */
+.pmp-bubble-overlay {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+    transition: all 0.5s ease-out;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.pmp-bubble-overlay.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.pmp-bubble-overlay .pmp-bubble-content {
+    padding: 15px 25px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.pmp-bubble-arrow {
     width: 0;
     height: 0;
     border-left: 12px solid transparent;
     border-right: 12px solid transparent;
-    border-top: 14px solid var(--pmp-accent-color, #ffc220);
-    filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.2));
+    border-top: 14px solid;
 }
 
 /* Hide Mapbox controls on detail page */
 .pmp-map-section .mapboxgl-ctrl-group {
     display: none !important;
+}
+
+/* Stabilize Mapbox marker to prevent jitter */
+.pmp-map-section .mapboxgl-marker {
+    will-change: transform;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .pmp-map-section .mapboxgl-ctrl-attrib {
@@ -274,33 +337,6 @@
     font-size: 14px;
 }
 
-/* Info Card - positioned at bottom to avoid overlapping with pin */
-.pmp-info-card {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--pmp-accent-color, #ffc220);
-    color: var(--pmp-button-text-color, #2d2d2d);
-    padding: 15px 25px;
-    border-radius: 6px;
-    text-align: center;
-    z-index: 10;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-.pmp-info-card-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
-}
-
-.pmp-info-card-value {
-    font-size: 18px;
-    font-weight: 700;
-}
-
 /* Share Button */
 .pmp-share-button {
     position: absolute;
@@ -364,12 +400,19 @@
 }
 
 @keyframes pmp-bounce-down {
-    0%, 20%, 50%, 80%, 100% {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
         transform: translateX(-50%) translateY(0);
     }
+
     40% {
         transform: translateX(-50%) translateY(-10px);
     }
+
     60% {
         transform: translateX(-50%) translateY(-5px);
     }
@@ -737,24 +780,24 @@
         height: 70vh;
     }
 
-    .pmp-mapbox-pin-marker .pmp-pin-icon {
+    .pmp-marker-pin svg {
         width: 30px;
         height: 45px;
     }
 
-    .pmp-marker-bubble {
+    .pmp-bubble-content {
         padding: 10px 16px;
     }
 
-    .pmp-marker-label {
+    .pmp-bubble-label {
         font-size: 9px;
     }
 
-    .pmp-marker-value {
+    .pmp-bubble-value {
         font-size: 16px;
     }
 
-    .pmp-marker-arrow {
+    .pmp-bubble-arrow {
         border-left-width: 10px;
         border-right-width: 10px;
         border-top-width: 12px;
@@ -776,11 +819,6 @@
         font-size: 36px;
     }
 
-    .pmp-info-card {
-        bottom: 85px;
-        padding: 12px 20px;
-    }
-
     .pmp-scroll-indicator {
         width: 44px;
         height: 44px;
@@ -789,10 +827,6 @@
 
     .pmp-scroll-arrow {
         font-size: 20px;
-    }
-
-    .pmp-info-card-value {
-        font-size: 16px;
     }
 
     /* Info cards responsive */
@@ -863,25 +897,25 @@
         height: 60vh;
     }
 
-    .pmp-mapbox-pin-marker .pmp-pin-icon {
+    .pmp-marker-pin svg {
         width: 26px;
         height: 39px;
     }
 
-    .pmp-marker-bubble {
+    .pmp-bubble-content {
         padding: 8px 14px;
     }
 
-    .pmp-marker-label {
+    .pmp-bubble-label {
         font-size: 8px;
         letter-spacing: 0.5px;
     }
 
-    .pmp-marker-value {
+    .pmp-bubble-value {
         font-size: 14px;
     }
 
-    .pmp-marker-arrow {
+    .pmp-bubble-arrow {
         border-left-width: 8px;
         border-right-width: 8px;
         border-top-width: 10px;
@@ -904,19 +938,6 @@
 
     .pmp-project-coords {
         font-size: 11px;
-    }
-
-    .pmp-info-card {
-        bottom: 75px;
-        padding: 10px 16px;
-    }
-
-    .pmp-info-card-label {
-        font-size: 9px;
-    }
-
-    .pmp-info-card-value {
-        font-size: 14px;
     }
 
     /* Info cards responsive - small screens */
@@ -1012,6 +1033,7 @@
 
 /* Mobile Touch Improvements */
 @media (hover: none) and (pointer: coarse) {
+
     .pmp-share-button,
     .pmp-back-button {
         min-height: 44px;

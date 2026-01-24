@@ -127,7 +127,8 @@ get_header();
         <div id="pmp-detail-map" class="pmp-detail-map-container"></div>
 
         <!-- Back to Map Button -->
-        <a href="javascript:history.back()" class="pmp-back-to-map-btn" onclick="event.preventDefault(); window.history.length > 1 ? history.back() : window.location.href='<?php echo home_url(); ?>';">
+        <a href="javascript:history.back()" class="pmp-back-to-map-btn"
+            onclick="event.preventDefault(); window.history.length > 1 ? history.back() : window.location.href='<?php echo home_url(); ?>';">
             <span class="pmp-back-icon">←</span>
             <span class="pmp-back-text"><?php _e('Back to Map', 'project-map-plugin'); ?></span>
         </a>
@@ -141,10 +142,13 @@ get_header();
                 <?php endif; ?>
                 <span class="pmp-project-country"><?php echo esc_html($project->country); ?></span>
                 <span class="pmp-project-coords">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="vertical-align: middle; margin-right: 2px;">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"
+                        style="vertical-align: middle; margin-right: 2px;">
+                        <path
+                            d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                     </svg>
-                    <?php echo number_format($project->gps_latitude, 5); ?>, <?php echo number_format($project->gps_longitude, 5); ?>
+                    <?php echo number_format($project->gps_latitude, 5); ?>,
+                    <?php echo number_format($project->gps_longitude, 5); ?>
                 </span>
             </div>
         </div>
@@ -195,7 +199,9 @@ get_header();
                         <div class="pmp-info-icon">❤️</div>
                         <div class="pmp-info-content">
                             <div class="pmp-info-label"><?php _e('THANKS TO', 'project-map-plugin'); ?></div>
-                            <div class="pmp-info-value"><?php echo esc_html($project->in_honour_of ?: __('Anonymous Donors', 'project-map-plugin')); ?></div>
+                            <div class="pmp-info-value">
+                                <?php echo esc_html($project->in_honour_of ?: __('Anonymous Donors', 'project-map-plugin')); ?>
+                            </div>
                         </div>
                     </div>
 
@@ -203,7 +209,9 @@ get_header();
                         <div class="pmp-info-icon">📋</div>
                         <div class="pmp-info-content">
                             <div class="pmp-info-label"><?php _e('PROJECT TYPE', 'project-map-plugin'); ?></div>
-                            <div class="pmp-info-value"><?php echo esc_html($project->project_type_name ?: __('N/A', 'project-map-plugin')); ?></div>
+                            <div class="pmp-info-value">
+                                <?php echo esc_html($project->project_type_name ?: __('N/A', 'project-map-plugin')); ?>
+                            </div>
                         </div>
                     </div>
 
@@ -211,7 +219,9 @@ get_header();
                         <div class="pmp-info-icon">⚙️</div>
                         <div class="pmp-info-content">
                             <div class="pmp-info-label"><?php _e('SOLUTION TYPE', 'project-map-plugin'); ?></div>
-                            <div class="pmp-info-value"><?php echo esc_html($project->solution_type_name ?: __('N/A', 'project-map-plugin')); ?></div>
+                            <div class="pmp-info-value">
+                                <?php echo esc_html($project->solution_type_name ?: __('N/A', 'project-map-plugin')); ?>
+                            </div>
                         </div>
                     </div>
 
@@ -219,25 +229,29 @@ get_header();
                         <div class="pmp-info-icon">📅</div>
                         <div class="pmp-info-content">
                             <div class="pmp-info-label"><?php _e('COMPLETED', 'project-map-plugin'); ?></div>
-                            <div class="pmp-info-value"><?php echo esc_html($completion_date ?: __('N/A', 'project-map-plugin')); ?></div>
+                            <div class="pmp-info-value">
+                                <?php echo esc_html($completion_date ?: __('N/A', 'project-map-plugin')); ?>
+                            </div>
                         </div>
                     </div>
 
                     <?php if ($project->project_number): ?>
-                    <div class="pmp-info-item">
-                        <div class="pmp-info-icon">#️⃣</div>
-                        <div class="pmp-info-content">
-                            <div class="pmp-info-label"><?php _e('PROJECT NUMBER', 'project-map-plugin'); ?></div>
-                            <div class="pmp-info-value"><?php echo esc_html($project->project_number); ?></div>
+                        <div class="pmp-info-item">
+                            <div class="pmp-info-icon">#️⃣</div>
+                            <div class="pmp-info-content">
+                                <div class="pmp-info-label"><?php _e('PROJECT NUMBER', 'project-map-plugin'); ?></div>
+                                <div class="pmp-info-value"><?php echo esc_html($project->project_number); ?></div>
+                            </div>
                         </div>
-                    </div>
                     <?php endif; ?>
 
                     <div class="pmp-info-item">
                         <div class="pmp-info-icon">📍</div>
                         <div class="pmp-info-content">
                             <div class="pmp-info-label"><?php _e('LOCATION', 'project-map-plugin'); ?></div>
-                            <div class="pmp-info-value"><?php echo esc_html($project->village_name . ', ' . $project->country); ?></div>
+                            <div class="pmp-info-value">
+                                <?php echo esc_html($project->village_name . ', ' . $project->country); ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -267,7 +281,8 @@ get_header();
                     <?php if ($solution_type_desc): ?>
                         <div class="pmp-type-description-item">
                             <h3><?php _e('About', 'project-map-plugin'); ?>
-                                <?php echo esc_html($project->solution_type_name); ?></h3>
+                                <?php echo esc_html($project->solution_type_name); ?>
+                            </h3>
                             <p><?php echo esc_html($solution_type_desc); ?></p>
                         </div>
                     <?php endif; ?>
@@ -303,7 +318,8 @@ get_header();
                             <div class="swiper-button-prev"></div>
                         </div>
                         <div class="pmp-gallery-counter">
-                            <span class="pmp-current-slide">1</span> / <span class="pmp-total-slides"><?php echo count($gallery_images); ?></span>
+                            <span class="pmp-current-slide">1</span> / <span
+                                class="pmp-total-slides"><?php echo count($gallery_images); ?></span>
                         </div>
                     </div>
                 </div>
@@ -367,71 +383,56 @@ get_header();
                     container: 'pmp-detail-map',
                     style: 'mapbox://styles/mapbox/satellite-streets-v12',
                     center: [<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>],
-                    zoom: 14,
-                    pitch: 45,
-                    bearing: -15,
+                    zoom: 10,  // Start closer to the location
+                    pitch: 60, // 3D tilted view
+                    bearing: 0,
                     antialias: true,
-                    interactive: false
+                    interactive: false,
+                    fadeDuration: 0 // Disable fade animations for smoother rendering
                 });
 
-                // Create custom marker element - start with pin icon
+                // Simple marker - just an icon, styled to match Charity Water
                 var markerEl = document.createElement('div');
-                markerEl.className = 'pmp-mapbox-pin-marker';
+                markerEl.className = 'pmp-map-marker';
+                markerEl.innerHTML = '<div class="pmp-marker-icon" style="background:<?php echo esc_attr($accent_color); ?>;"><svg viewBox="0 0 24 24" width="20" height="20" fill="<?php echo esc_attr($button_text_color); ?>"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>';
 
-                // Pin icon HTML (shown during zoom)
-                var pinIconHTML = '<svg class="pmp-pin-icon" viewBox="0 0 24 36" width="36" height="54"><defs><filter id="pin-shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.4"/></filter></defs><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24c0-6.6-5.4-12-12-12zm0 18c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z" fill="<?php echo esc_attr($accent_color); ?>" filter="url(#pin-shadow)"/><circle cx="12" cy="12" r="4" fill="<?php echo esc_attr($button_text_color); ?>"/></svg>';
-
-                // Speech bubble HTML (shown after zoom completes)
-                var bubbleHTML = '<div class="pmp-marker-bubble" style="background:<?php echo esc_attr($accent_color); ?>;color:<?php echo esc_attr($button_text_color); ?>;"><div class="pmp-marker-label"><?php _e("PEOPLE SERVED", "project-map-plugin"); ?></div><div class="pmp-marker-value"><?php echo number_format($project->beneficiaries); ?></div></div><div class="pmp-marker-arrow" style="border-top-color:<?php echo esc_attr($accent_color); ?>;"></div>';
-
-                // Start with pin icon
-                markerEl.innerHTML = pinIconHTML;
-
-                // Add marker that doesn't rotate with map
                 var marker = new mapboxgl.Marker({
                     element: markerEl,
-                    anchor: 'bottom',
-                    rotationAlignment: 'viewport',
-                    pitchAlignment: 'viewport'
+                    anchor: 'bottom'
                 })
-                .setLngLat([<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>])
-                .addTo(map);
+                    .setLngLat([<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>])
+                    .addTo(map);
+
+                // Rotation function - continuous and smooth
+                var isRotating = false; // Start after flyTo completes
+                function spinGlobe() {
+                    if (!isRotating) return;
+
+                    // Rotate 1 degree per call, creating smooth continuous rotation
+                    map.rotateTo(map.getBearing() + 1, {
+                        duration: 150, // 150ms per degree = ~54 seconds per full rotation (slower)
+                        easing: function (t) { return t; } // Linear
+                    });
+                }
 
                 map.on('load', function () {
-                    // Add 3D terrain
+                    // Add 3D terrain with smaller tile size for faster loading
                     map.addSource('mapbox-dem', {
                         'type': 'raster-dem',
                         'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
-                        'tileSize': 512,
-                        'maxzoom': 14
+                        'tileSize': 256, // Smaller tiles = faster loading
+                        'maxzoom': 12   // Limit terrain detail
                     });
+                    map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.2 });
 
-                    map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
-
-                    // Add 3D building extrusion
-                    var layers = map.getStyle().layers;
-                    var labelLayerId;
-                    for (var i = 0; i < layers.length; i++) {
-                        if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
-                            labelLayerId = layers[i].id;
-                            break;
-                        }
-                    }
-
-                    map.addLayer({
-                        'id': '3d-buildings',
-                        'source': 'composite',
-                        'source-layer': 'building',
-                        'filter': ['==', 'extrude', 'true'],
-                        'type': 'fill-extrusion',
-                        'minzoom': 15,
-                        'paint': {
-                            'fill-extrusion-color': '#aaa',
-                            'fill-extrusion-height': ['get', 'height'],
-                            'fill-extrusion-base': ['get', 'min_height'],
-                            'fill-extrusion-opacity': 0.6
-                        }
-                    }, labelLayerId);
+                    // Add fog to hide distant tiles (reduces loading)
+                    map.setFog({
+                        'color': 'rgb(186, 210, 235)', // Light blue fog
+                        'high-color': 'rgb(36, 92, 223)', // Sky blue
+                        'horizon-blend': 0.02,
+                        'space-color': 'rgb(11, 11, 25)', // Dark space
+                        'star-intensity': 0.6
+                    });
 
                     // Add sky atmosphere
                     map.addLayer({
@@ -444,42 +445,33 @@ get_header();
                         }
                     });
 
-                    // Smooth flyTo animation with tilted camera
-                    setTimeout(function () {
-                        map.flyTo({
-                            center: [<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>],
-                            zoom: 17,
-                            pitch: 65,
-                            bearing: 30,
-                            duration: 5000,
-                            essential: true,
-                            curve: 1.5,
-                            easing: function(t) {
-                                return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-                            }
-                        });
+                    // FlyTo animation - zoom in a bit
+                    map.flyTo({
+                        center: [<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>],
+                        zoom: 13, // Zoom in from 10 to 13
+                        pitch: 60,
+                        bearing: 30,
+                        duration: 4000, // 4 second fly-in
+                        essential: true
+                    });
 
-                        // After fly-in completes, change to bubble and start rotation
+                    // Start rotation after flyTo completes
+                    map.once('moveend', function () {
+                        // Show bubble overlay after flyTo
+                        var bubbleOverlay = document.createElement('div');
+                        bubbleOverlay.className = 'pmp-bubble-overlay';
+                        bubbleOverlay.innerHTML = '<div class="pmp-bubble-content" style="background:<?php echo esc_attr($accent_color); ?>;color:<?php echo esc_attr($button_text_color); ?>;"><div class="pmp-bubble-label"><?php _e("PEOPLE SERVED", "project-map-plugin"); ?></div><div class="pmp-bubble-value"><?php echo number_format($project->beneficiaries); ?></div></div>';
+                        document.getElementById('pmp-detail-map').appendChild(bubbleOverlay);
+
+                        // Animate bubble in
                         setTimeout(function () {
-                            // Change marker from pin to speech bubble
-                            markerEl.innerHTML = bubbleHTML;
-                            markerEl.classList.add('pmp-marker-bubble-mode');
+                            bubbleOverlay.classList.add('visible');
+                        }, 100);
 
-                            // Start smooth slow rotation
-                            var rotationAngle = 30;
-                            function rotateSmooth() {
-                                rotationAngle += 60; // Rotate 60 degrees
-                                if (rotationAngle >= 360) rotationAngle = rotationAngle - 360;
-                                map.rotateTo(rotationAngle, {
-                                    duration: 30000, // 30 seconds per 60 degrees = very slow
-                                    easing: function(t) { return t; } // Linear easing
-                                });
-                            }
-                            rotateSmooth();
-                            // Continue rotation every 30 seconds
-                            setInterval(rotateSmooth, 30000);
-                        }, 5500);
-                    }, 800);
+                        isRotating = true;
+                        map.on('moveend', spinGlobe);
+                        spinGlobe();
+                    });
                 });
 
                 map.on('error', function (e) {
@@ -612,7 +604,7 @@ get_header();
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     // Initialize Swiper Gallery
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var gallerySwiper = document.querySelector('.pmp-gallery-swiper');
         if (gallerySwiper) {
             var swiper = new Swiper('.pmp-gallery-swiper', {
@@ -630,7 +622,7 @@ get_header();
                     prevEl: '.swiper-button-prev'
                 },
                 on: {
-                    slideChange: function() {
+                    slideChange: function () {
                         var currentSlide = document.querySelector('.pmp-current-slide');
                         if (currentSlide) {
                             currentSlide.textContent = this.realIndex + 1;
