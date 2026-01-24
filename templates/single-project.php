@@ -132,9 +132,8 @@ get_header();
             <span class="pmp-back-text"><?php _e('Back to Map', 'project-map-plugin'); ?></span>
         </a>
 
-        <!-- Project Header Overlay -->
+        <!-- Project Header Overlay (above the pin) -->
         <div class="pmp-project-header">
-            <div class="pmp-project-marker">📍</div>
             <h1 class="pmp-project-title"><?php echo esc_html($project->village_name); ?></h1>
             <div class="pmp-project-location">
                 <?php if ($project->country_flag): ?>
@@ -142,16 +141,12 @@ get_header();
                 <?php endif; ?>
                 <span class="pmp-project-country"><?php echo esc_html($project->country); ?></span>
                 <span class="pmp-project-coords">
-                    © <?php echo number_format($project->gps_latitude, 5); ?>,
-                    <?php echo number_format($project->gps_longitude, 5); ?> ©
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="vertical-align: middle; margin-right: 2px;">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                    <?php echo number_format($project->gps_latitude, 5); ?>, <?php echo number_format($project->gps_longitude, 5); ?>
                 </span>
             </div>
-        </div>
-
-        <!-- Info Card -->
-        <div class="pmp-info-card">
-            <div class="pmp-info-card-label"><?php _e('PEOPLE SERVED', 'project-map-plugin'); ?></div>
-            <div class="pmp-info-card-value"><?php echo number_format($project->beneficiaries); ?></div>
         </div>
 
         <!-- Scroll Indicator -->
@@ -379,6 +374,29 @@ get_header();
                     interactive: false
                 });
 
+                // Create custom marker element - start with pin icon
+                var markerEl = document.createElement('div');
+                markerEl.className = 'pmp-mapbox-pin-marker';
+
+                // Pin icon HTML (shown during zoom)
+                var pinIconHTML = '<svg class="pmp-pin-icon" viewBox="0 0 24 36" width="36" height="54"><defs><filter id="pin-shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.4"/></filter></defs><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24c0-6.6-5.4-12-12-12zm0 18c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z" fill="<?php echo esc_attr($accent_color); ?>" filter="url(#pin-shadow)"/><circle cx="12" cy="12" r="4" fill="<?php echo esc_attr($button_text_color); ?>"/></svg>';
+
+                // Speech bubble HTML (shown after zoom completes)
+                var bubbleHTML = '<div class="pmp-marker-bubble" style="background:<?php echo esc_attr($accent_color); ?>;color:<?php echo esc_attr($button_text_color); ?>;"><div class="pmp-marker-label"><?php _e("PEOPLE SERVED", "project-map-plugin"); ?></div><div class="pmp-marker-value"><?php echo number_format($project->beneficiaries); ?></div></div><div class="pmp-marker-arrow" style="border-top-color:<?php echo esc_attr($accent_color); ?>;"></div>';
+
+                // Start with pin icon
+                markerEl.innerHTML = pinIconHTML;
+
+                // Add marker that doesn't rotate with map
+                var marker = new mapboxgl.Marker({
+                    element: markerEl,
+                    anchor: 'bottom',
+                    rotationAlignment: 'viewport',
+                    pitchAlignment: 'viewport'
+                })
+                .setLngLat([<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>])
+                .addTo(map);
+
                 map.on('load', function () {
                     // Add 3D terrain
                     map.addSource('mapbox-dem', {
@@ -441,16 +459,25 @@ get_header();
                             }
                         });
 
-                        // Start smooth rotation after fly-in
+                        // After fly-in completes, change to bubble and start rotation
                         setTimeout(function () {
+                            // Change marker from pin to speech bubble
+                            markerEl.innerHTML = bubbleHTML;
+                            markerEl.classList.add('pmp-marker-bubble-mode');
+
+                            // Start smooth slow rotation
                             var rotationAngle = 30;
-                            function rotate() {
-                                rotationAngle += 0.08;
-                                if (rotationAngle >= 360) rotationAngle = 0;
-                                map.rotateTo(rotationAngle, { duration: 0 });
-                                requestAnimationFrame(rotate);
+                            function rotateSmooth() {
+                                rotationAngle += 60; // Rotate 60 degrees
+                                if (rotationAngle >= 360) rotationAngle = rotationAngle - 360;
+                                map.rotateTo(rotationAngle, {
+                                    duration: 30000, // 30 seconds per 60 degrees = very slow
+                                    easing: function(t) { return t; } // Linear easing
+                                });
                             }
-                            rotate();
+                            rotateSmooth();
+                            // Continue rotation every 30 seconds
+                            setInterval(rotateSmooth, 30000);
                         }, 5500);
                     }, 800);
                 });
