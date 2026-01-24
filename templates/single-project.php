@@ -383,8 +383,8 @@ get_header();
                     container: 'pmp-detail-map',
                     style: 'mapbox://styles/mapbox/satellite-streets-v12',
                     center: [<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>],
-                    zoom: 10,  // Start closer to the location
-                    pitch: 60, // 3D tilted view
+                    zoom: 9,   // Start zoomed out
+                    pitch: 45, // Flatter tilt like Charity Water
                     bearing: 0,
                     antialias: true,
                     interactive: false,
@@ -423,16 +423,9 @@ get_header();
                         'tileSize': 256, // Smaller tiles = faster loading
                         'maxzoom': 12   // Limit terrain detail
                     });
-                    map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.2 });
+                    map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.0 });
 
-                    // Add fog to hide distant tiles (reduces loading)
-                    map.setFog({
-                        'color': 'rgb(186, 210, 235)', // Light blue fog
-                        'high-color': 'rgb(36, 92, 223)', // Sky blue
-                        'horizon-blend': 0.02,
-                        'space-color': 'rgb(11, 11, 25)', // Dark space
-                        'star-intensity': 0.6
-                    });
+                    // Minimal fog (like Charity Water - almost none)
 
                     // Add sky atmosphere
                     map.addLayer({
@@ -448,8 +441,8 @@ get_header();
                     // FlyTo animation - zoom in a bit
                     map.flyTo({
                         center: [<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>],
-                        zoom: 13, // Zoom in from 10 to 13
-                        pitch: 60,
+                        zoom: 11, // Zoom to 11 (more zoomed out like Charity Water)
+                        pitch: 45,
                         bearing: 30,
                         duration: 4000, // 4 second fly-in
                         essential: true
