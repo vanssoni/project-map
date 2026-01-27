@@ -82,7 +82,7 @@
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 1000;
+    z-index: 20;
     background-color: var(--pmp-accent-color, #ffc220);
     color: var(--pmp-button-text-color, #2d2d2d);
     border: none;
@@ -352,7 +352,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    z-index: 50;
+    z-index: 10;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
 }
@@ -373,7 +373,7 @@
     bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 50;
+    z-index: 10;
     animation: pmp-bounce-down 2s infinite;
     cursor: pointer;
     background: rgba(0, 0, 0, 0.5);
@@ -1160,7 +1160,7 @@
 }
 
 .pmp-info-modal-close:hover {
-    color: #000;
+    color: #000 !important;
 }
 
 .pmp-info-modal-title {
