@@ -142,13 +142,14 @@ get_header();
                 <?php endif; ?>
                 <span class="pmp-project-country"><?php echo esc_html($project->country); ?></span>
                 <span class="pmp-project-coords">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"
-                        style="vertical-align: middle; margin-right: 2px;">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"
+                        style="vertical-align: middle; margin-right: 4px;">
                         <path
                             d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                     </svg>
                     <?php echo number_format($project->gps_latitude, 5); ?>,
                     <?php echo number_format($project->gps_longitude, 5); ?>
+                    <span class="pmp-info-help" data-popup="coords">?</span>
                 </span>
             </div>
         </div>
@@ -188,7 +189,8 @@ get_header();
                 <div class="pmp-info-main-card">
                     <div class="pmp-info-main-icon">👥</div>
                     <div class="pmp-info-main-content">
-                        <div class="pmp-info-main-label"><?php _e('PEOPLE SERVED', 'project-map-plugin'); ?></div>
+                        <div class="pmp-info-main-label"><?php _e('PEOPLE SERVED', 'project-map-plugin'); ?> <span
+                                class="pmp-info-help" data-popup="people">?</span></div>
                         <div class="pmp-info-main-value"><?php echo number_format($project->beneficiaries); ?></div>
                     </div>
                 </div>
@@ -228,7 +230,8 @@ get_header();
                     <div class="pmp-info-item">
                         <div class="pmp-info-icon">📅</div>
                         <div class="pmp-info-content">
-                            <div class="pmp-info-label"><?php _e('COMPLETED', 'project-map-plugin'); ?></div>
+                            <div class="pmp-info-label"><?php _e('COMPLETED', 'project-map-plugin'); ?> <span
+                                    class="pmp-info-help" data-popup="completed">?</span></div>
                             <div class="pmp-info-value">
                                 <?php echo esc_html($completion_date ?: __('N/A', 'project-map-plugin')); ?>
                             </div>
@@ -248,7 +251,8 @@ get_header();
                     <div class="pmp-info-item">
                         <div class="pmp-info-icon">📍</div>
                         <div class="pmp-info-content">
-                            <div class="pmp-info-label"><?php _e('LOCATION', 'project-map-plugin'); ?></div>
+                            <div class="pmp-info-label"><?php _e('LOCATION', 'project-map-plugin'); ?> <span
+                                    class="pmp-info-help" data-popup="location">?</span></div>
                             <div class="pmp-info-value">
                                 <?php echo esc_html($project->village_name . ', ' . $project->country); ?>
                             </div>
@@ -357,6 +361,22 @@ get_header();
         </div>
     </section>
 
+    <!-- Info Popup Modal -->
+    <div class="pmp-info-modal" id="pmp-info-modal">
+        <div class="pmp-info-modal-overlay"></div>
+        <div class="pmp-info-modal-content">
+            <div class="pmp-info-modal-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path
+                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+            </div>
+            <button class="pmp-info-modal-close" id="pmp-modal-close">×</button>
+            <h3 class="pmp-info-modal-title" id="pmp-modal-title"></h3>
+            <p class="pmp-info-modal-text" id="pmp-modal-text"></p>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -441,7 +461,7 @@ get_header();
                     // FlyTo animation - zoom in a bit
                     map.flyTo({
                         center: [<?php echo $project->gps_longitude; ?>, <?php echo $project->gps_latitude; ?>],
-                        zoom: 11, // Zoom to 11 (more zoomed out like Charity Water)
+                        zoom: 14, // Zoom to 14 for closer view
                         pitch: 45,
                         bearing: 30,
                         duration: 4000, // 4 second fly-in
@@ -568,12 +588,21 @@ get_header();
         }
     })();
 
-    // Scroll indicator
+    // Scroll indicator - consistent scroll to just past the map section
     document.querySelector('.pmp-scroll-indicator').addEventListener('click', function () {
+        var mapSection = document.querySelector('.pmp-map-section');
+        var mapHeight = mapSection ? mapSection.offsetHeight : window.innerHeight * 0.8;
         window.scrollTo({
-            top: window.innerHeight,
+            top: mapHeight - 50, // Scroll to just reveal content below map
             behavior: 'smooth'
         });
+    });
+
+    // Clear text selection when clicking on map
+    document.getElementById('pmp-detail-map').addEventListener('click', function () {
+        if (window.getSelection) {
+            window.getSelection().removeAllRanges();
+        }
     });
 
     // Share button
@@ -589,6 +618,53 @@ get_header();
             navigator.clipboard.writeText(window.location.href).then(function () {
                 alert('<?php echo esc_js(__('Link copied to clipboard!', 'project-map-plugin')); ?>');
             });
+        }
+    });
+
+    // Info popup functionality
+    var popupContent = {
+        coords: {
+            title: '<?php echo number_format($project->gps_latitude, 5) . ", " . number_format($project->gps_longitude, 5); ?>',
+            text: 'These are the GPS coordinates of your project, plotted in Google Maps. A GPS (Global Positioning System) coordinate is the exact latitude and longitude of any given point on the Earth\'s surface. We use GPS coordinates to record the location of each water project we fund. Please note: there are many different formats for GPS. We use degree decimal format.'
+        },
+        people: {
+            title: '<?php echo number_format($project->beneficiaries); ?> People Served',
+            text: 'This is the population of the community that has access to project.'
+        },
+        completed: {
+            title: 'Published <?php echo esc_js($completion_date); ?>',
+            text: 'We publish a project when we\'ve approved a final report from our partners and made sure your project is working for the best of the community.'
+        },
+        location: {
+            title: '<?php echo number_format($project->gps_latitude, 5) . ", " . number_format($project->gps_longitude, 5); ?>',
+            text: 'These are the GPS coordinates of your project, plotted in Google Maps. A GPS (Global Positioning System) coordinate is the exact latitude and longitude of any given point on the Earth\'s surface. We use GPS coordinates to record the location of each water project we fund. Please note: there are many different formats for GPS. We use degree decimal format.'
+        }
+    };
+
+    document.querySelectorAll('.pmp-info-help').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var popupType = this.getAttribute('data-popup');
+            var content = popupContent[popupType];
+            if (content) {
+                document.getElementById('pmp-modal-title').textContent = content.title;
+                document.getElementById('pmp-modal-text').textContent = content.text;
+                document.getElementById('pmp-info-modal').classList.add('active');
+            }
+        });
+    });
+
+    document.getElementById('pmp-modal-close').addEventListener('click', function () {
+        document.getElementById('pmp-info-modal').classList.remove('active');
+    });
+
+    document.querySelector('.pmp-info-modal-overlay').addEventListener('click', function () {
+        document.getElementById('pmp-info-modal').classList.remove('active');
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.getElementById('pmp-info-modal').classList.remove('active');
         }
     });
 </script>

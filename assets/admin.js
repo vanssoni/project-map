@@ -207,7 +207,7 @@
 
             var csvContent = 'Village Name,Project Number,Country,GPS Latitude,GPS Longitude,Project Type,Solution Type,Completion Month,Completion Year,Beneficiaries,In Honour Of,Description,Featured Image URL,Gallery Images,Video URLs,Status\n';
             csvContent += 'La Canada Village,PRJ-001,Honduras,14.9914,-88.05018,Water Projects,Piped System Tap Stand,5,2012,810,Lucia\'s Gift,A clean water project serving 810 people in the rural community.,https://example.com/image1.jpg,"https://example.com/gallery1.jpg,https://example.com/gallery2.jpg",https://youtube.com/watch?v=example,publish\n';
-            csvContent += 'Rajasthan Village,PRJ-002,India,26.9124,73.0243,Water Projects,Well With Hand Pump,12,2014,1650,Anonymous Donors,Providing clean water access to 1650 beneficiaries.,,,draft\n';
+            csvContent += 'Rajasthan Village,PRJ-002,India,26.9124,73.0243,Water Projects,Well With Hand Pump,12,2014,1650,Anonymous Donors,Providing clean water access to 1650 beneficiaries.,,,,draft\n';
 
             var blob = new Blob([csvContent], { type: 'text/csv' });
             var url = window.URL.createObjectURL(blob);
