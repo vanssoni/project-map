@@ -25,6 +25,10 @@ $initial_country = esc_attr($atts['country']);
 $initial_project_type = intval($atts['project_type']);
 $initial_solution_type = intval($atts['solution_type']);
 
+// Branding
+$map_label = get_option('pmp_map_label', 'Project Map');
+$logo_image = get_option('pmp_logo_image', '');
+
 // Color customization
 $header_bg_color = get_option('pmp_header_bg_color', '#1d1d1d');
 $header_text_color = get_option('pmp_header_text_color', '#ffffff');
@@ -41,8 +45,12 @@ $button_text_color = get_option('pmp_button_text_color', '#2d2d2d');
     <!-- Loading Screen -->
     <div class="pmp-loading-screen" id="pmp-loading">
         <div class="pmp-loading-content">
-            <div class="pmp-loader-icon">🌍</div>
-            <p><?php _e('Loading projects...', 'project-map-plugin'); ?></p>
+            <?php if ($logo_image): ?>
+                <div class="pmp-loader-icon"><img src="<?php echo esc_url($logo_image); ?>" alt="" class="pmp-loader-logo-img"></div>
+            <?php else: ?>
+                <div class="pmp-loader-icon">🌍</div>
+            <?php endif; ?>
+            <p><?php echo esc_html(sprintf(__('Loading %s...', 'project-map-plugin'), $map_label)); ?></p>
         </div>
     </div>
 
@@ -51,9 +59,13 @@ $button_text_color = get_option('pmp_button_text_color', '#2d2d2d');
         <div class="pmp-header-content">
             <!-- Brand -->
             <div class="pmp-brand">
-                <div class="pmp-logo">🌍</div>
+                <?php if ($logo_image): ?>
+                    <div class="pmp-logo"><img src="<?php echo esc_url($logo_image); ?>" alt="" class="pmp-header-logo-img"></div>
+                <?php else: ?>
+                    <div class="pmp-logo">🌍</div>
+                <?php endif; ?>
                 <div class="pmp-brand-text">
-                    <h2 class="pmp-title"><?php _e('Project Map', 'project-map-plugin'); ?></h2>
+                    <h2 class="pmp-title"><?php echo esc_html($map_label); ?></h2>
                     <p class="pmp-last-updated"><?php _e('Last updated:', 'project-map-plugin'); ?> <?php echo date_i18n(get_option('date_format')); ?></p>
                 </div>
             </div>
@@ -169,8 +181,8 @@ $button_text_color = get_option('pmp_button_text_color', '#2d2d2d');
                         <div class="pmp-popup-details">
                             <div class="pmp-detail-row">
                                 <div class="pmp-detail-item">
-                                    <div class="pmp-detail-label"><?php _e('THANKS TO', 'project-map-plugin'); ?></div>
-                                    <div class="pmp-detail-value" id="pmp-popup-funded-by"></div>
+                                    <div class="pmp-detail-label"><?php _e('PROJECT TYPE', 'project-map-plugin'); ?></div>
+                                    <div class="pmp-detail-value" id="pmp-popup-project-type"></div>
                                 </div>
                                 <div class="pmp-detail-item">
                                     <div class="pmp-detail-label"><?php _e('SOLUTION TYPE', 'project-map-plugin'); ?></div>

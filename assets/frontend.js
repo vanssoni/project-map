@@ -212,7 +212,9 @@
                         countryFlag: project.countryFlag,
                         peopleServed: project.peopleServed,
                         date: project.date,
+                        completionYear: project.completionYear,
                         image: project.image,
+                        projectType: project.projectType,
                         solutionType: project.solutionType,
                         fundedBy: project.fundedBy
                     }
@@ -337,11 +339,15 @@
         var buttonTextColor = pmp_ajax.button_text_color || '#2d2d2d';
         var projectImage = props.image || pmp_ajax.placeholder_image || '';
 
+        var completionYear = props.completionYear ? ' (' + props.completionYear + ')' : '';
+        var projectType = props.projectType || '';
+
         var popupHTML = '<div class="pmp-marker-preview">' +
             '<button class="pmp-marker-popup-close" onclick="pmpCloseMarkerPopup()">✕</button>' +
             '<img class="pmp-marker-project-image" src="' + projectImage + '" alt="' + props.name + '" onerror="this.src=\'' + (pmp_ajax.placeholder_image || '') + '\'">' +
-            '<h3>' + props.name + '</h3>' +
+            '<h3>' + props.name + completionYear + '</h3>' +
             '<p class="pmp-marker-country"><span class="pmp-marker-flag">' + props.countryFlag + '</span> ' + props.country + '</p>' +
+            (projectType ? '<p class="pmp-marker-type">Project Type: ' + projectType + '</p>' : '') +
             '<p class="pmp-marker-served">' + parseInt(props.peopleServed).toLocaleString() + ' people served</p>' +
             '<button onclick="pmpOpenProjectPopup(\'' + props.id + '\')" style="background-color: ' + accentColor + '; color: ' + buttonTextColor + ';">VIEW DETAILS</button>' +
             '</div>';
@@ -413,7 +419,7 @@
             }
         };
         document.getElementById('pmp-popup-people-served').textContent = project.peopleServed.toLocaleString();
-        document.getElementById('pmp-popup-funded-by').textContent = project.fundedBy;
+        document.getElementById('pmp-popup-project-type').textContent = project.projectType || 'N/A';
         document.getElementById('pmp-popup-solution-type').textContent = project.solutionType || 'N/A';
         document.getElementById('pmp-popup-date').textContent = project.date || 'N/A';
 
@@ -614,12 +620,15 @@
             marker.on('click', function(e) {
                 var proj = this.projectData;
                 var projectImage = proj.image || pmp_ajax.placeholder_image || '';
+                var completionYr = proj.completionYear ? ' (' + proj.completionYear + ')' : '';
+                var projType = proj.projectType || '';
 
                 var popupHTML = '<div class="pmp-marker-preview">' +
                     '<button class="pmp-marker-popup-close" onclick="pmpCloseMarkerPopup()">✕</button>' +
                     '<img class="pmp-marker-project-image" src="' + projectImage + '" alt="' + proj.name + '" onerror="this.src=\'' + (pmp_ajax.placeholder_image || '') + '\'">' +
-                    '<h3>' + proj.name + '</h3>' +
+                    '<h3>' + proj.name + completionYr + '</h3>' +
                     '<p class="pmp-marker-country"><span class="pmp-marker-flag">' + (proj.countryFlag || '') + '</span> ' + proj.country + '</p>' +
+                    (projType ? '<p class="pmp-marker-type">Project Type: ' + projType + '</p>' : '') +
                     '<p class="pmp-marker-served">' + parseInt(proj.peopleServed).toLocaleString() + ' people served</p>' +
                     '<button onclick="pmpOpenProjectPopup(\'' + proj.id + '\')" style="background-color: ' + accentColor + '; color: ' + buttonTextColor + ';">VIEW DETAILS</button>' +
                     '</div>';
@@ -660,12 +669,15 @@
             });
 
             var projectImage = project.image || pmp_ajax.placeholder_image || '';
+            var compYear = project.completionYear ? ' (' + project.completionYear + ')' : '';
+            var pType = project.projectType || '';
 
             var popupHTML = '<div class="pmp-marker-preview">' +
                 '<button class="pmp-marker-popup-close" onclick="pmpCloseMarkerPopup()">✕</button>' +
                 '<img class="pmp-marker-project-image" src="' + projectImage + '" alt="' + project.name + '" onerror="this.src=\'' + (pmp_ajax.placeholder_image || '') + '\'">' +
-                '<h3>' + project.name + '</h3>' +
+                '<h3>' + project.name + compYear + '</h3>' +
                 '<p class="pmp-marker-country"><span class="pmp-marker-flag">' + (project.countryFlag || '') + '</span> ' + project.country + '</p>' +
+                (pType ? '<p class="pmp-marker-type">Project Type: ' + pType + '</p>' : '') +
                 '<p class="pmp-marker-served">' + parseInt(project.peopleServed).toLocaleString() + ' people served</p>' +
                 '<button onclick="pmpOpenProjectPopup(\'' + project.id + '\')" style="background-color: ' + accentColor + '; color: ' + buttonTextColor + ';">VIEW DETAILS</button>' +
                 '</div>';

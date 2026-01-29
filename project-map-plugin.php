@@ -733,6 +733,33 @@ class ProjectMapPlugin
             // Load assets for single project page
             $this->load_single_project_assets();
             add_filter('template_include', array($this, 'single_project_template'));
+
+            // Set page title to "Completed [Project Type] - [Village Name]"
+            add_filter('document_title_parts', function ($title_parts) use ($project) {
+                $project_type = $project->project_type_name ?: __('Project', 'project-map-plugin');
+                $title_parts['title'] = sprintf(
+                    __('Completed %s - %s', 'project-map-plugin'),
+                    $project_type,
+                    $project->village_name
+                );
+                return $title_parts;
+            });
+
+            // Also filter wp_title for themes that use it
+            add_filter('wp_title', function ($title) use ($project) {
+                $project_type = $project->project_type_name ?: __('Project', 'project-map-plugin');
+                return sprintf(
+                    __('Completed %s - %s', 'project-map-plugin'),
+                    $project_type,
+                    $project->village_name
+                );
+            }, 10, 1);
+
+            // Add body class
+            add_filter('body_class', function ($classes) {
+                $classes[] = 'pmp-single-project-page';
+                return $classes;
+            });
         }
     }
 
@@ -875,7 +902,9 @@ class ProjectMapPlugin
                 'coordinates' => array((float)$project->gps_longitude, (float)$project->gps_latitude),
                 'peopleServed' => (int)$project->beneficiaries,
                 'date' => $this->format_completion_date($project->completion_month, $project->completion_year),
+                'completionYear' => $project->completion_year ?: '',
                 'image' => $featured_image,
+                'projectType' => $project->project_type_name ?: '',
                 'solutionType' => $project->solution_type_name ?: '',
                 'fundedBy' => $project->in_honour_of ?: 'Anonymous Donors'
             );

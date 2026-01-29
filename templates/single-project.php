@@ -300,8 +300,8 @@ get_header();
 
                     <!-- Desktop Grid Gallery -->
                     <div class="pmp-gallery-grid pmp-gallery-desktop">
-                        <?php foreach ($gallery_images as $image): ?>
-                            <div class="pmp-gallery-item">
+                        <?php foreach ($gallery_images as $index => $image): ?>
+                            <div class="pmp-gallery-item" data-lightbox-index="<?php echo $index; ?>">
                                 <img src="<?php echo esc_url($image); ?>" alt="" loading="lazy">
                             </div>
                         <?php endforeach; ?>
@@ -312,7 +312,7 @@ get_header();
                         <div class="swiper pmp-gallery-swiper">
                             <div class="swiper-wrapper">
                                 <?php foreach ($gallery_images as $index => $image): ?>
-                                    <div class="swiper-slide">
+                                    <div class="swiper-slide" data-lightbox-index="<?php echo $index; ?>">
                                         <img src="<?php echo esc_url($image); ?>" alt="" loading="lazy">
                                     </div>
                                 <?php endforeach; ?>
@@ -360,6 +360,20 @@ get_header();
 
         </div>
     </section>
+
+    <!-- Lightbox -->
+    <div class="pmp-lightbox" id="pmp-lightbox">
+        <div class="pmp-lightbox-overlay"></div>
+        <button class="pmp-lightbox-close" id="pmp-lightbox-close">&times;</button>
+        <button class="pmp-lightbox-prev" id="pmp-lightbox-prev">&#8249;</button>
+        <button class="pmp-lightbox-next" id="pmp-lightbox-next">&#8250;</button>
+        <div class="pmp-lightbox-content">
+            <img id="pmp-lightbox-img" src="" alt="">
+        </div>
+        <div class="pmp-lightbox-counter">
+            <span id="pmp-lightbox-current">1</span> / <span id="pmp-lightbox-total">1</span>
+        </div>
+    </div>
 
     <!-- Info Popup Modal -->
     <div class="pmp-info-modal" id="pmp-info-modal">
@@ -701,6 +715,75 @@ get_header();
             });
         }
     });
+</script>
+
+<script>
+    // Lightbox for gallery images
+    (function () {
+        var galleryImages = <?php echo json_encode(array_values($gallery_images)); ?>;
+        if (!galleryImages || galleryImages.length === 0) return;
+
+        var lightbox = document.getElementById('pmp-lightbox');
+        if (!lightbox) return;
+
+        var lightboxImg = document.getElementById('pmp-lightbox-img');
+        var lightboxCurrent = document.getElementById('pmp-lightbox-current');
+        var lightboxTotal = document.getElementById('pmp-lightbox-total');
+        var currentIndex = 0;
+
+        lightboxTotal.textContent = galleryImages.length;
+
+        function openLightbox(index) {
+            currentIndex = index;
+            lightboxImg.src = galleryImages[currentIndex];
+            lightboxCurrent.textContent = currentIndex + 1;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function showNext() {
+            currentIndex = (currentIndex + 1) % galleryImages.length;
+            lightboxImg.src = galleryImages[currentIndex];
+            lightboxCurrent.textContent = currentIndex + 1;
+        }
+
+        function showPrev() {
+            currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+            lightboxImg.src = galleryImages[currentIndex];
+            lightboxCurrent.textContent = currentIndex + 1;
+        }
+
+        // Desktop gallery items
+        document.querySelectorAll('.pmp-gallery-item[data-lightbox-index]').forEach(function (item) {
+            item.addEventListener('click', function () {
+                openLightbox(parseInt(this.getAttribute('data-lightbox-index')));
+            });
+        });
+
+        // Mobile swiper slides
+        document.querySelectorAll('.pmp-gallery-swiper .swiper-slide[data-lightbox-index]').forEach(function (slide) {
+            slide.addEventListener('click', function () {
+                openLightbox(parseInt(this.getAttribute('data-lightbox-index')));
+            });
+        });
+
+        document.getElementById('pmp-lightbox-close').addEventListener('click', closeLightbox);
+        document.getElementById('pmp-lightbox-next').addEventListener('click', showNext);
+        document.getElementById('pmp-lightbox-prev').addEventListener('click', showPrev);
+        document.querySelector('.pmp-lightbox-overlay').addEventListener('click', closeLightbox);
+
+        document.addEventListener('keydown', function (e) {
+            if (!lightbox.classList.contains('active')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') showNext();
+            if (e.key === 'ArrowLeft') showPrev();
+        });
+    })();
 </script>
 
 <?php

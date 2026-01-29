@@ -22,6 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pmp_settings_nonce'])
     update_option('pmp_osm_style', sanitize_text_field($_POST['osm_style']));
     update_option('pmp_enable_mapbox', isset($_POST['enable_mapbox']) ? '1' : '0');
 
+    // Branding settings
+    update_option('pmp_map_label', sanitize_text_field($_POST['map_label']));
+    update_option('pmp_logo_image', esc_url_raw($_POST['logo_image']));
+
     // Color customization settings
     update_option('pmp_header_bg_color', sanitize_hex_color($_POST['header_bg_color']));
     update_option('pmp_header_text_color', sanitize_hex_color($_POST['header_text_color']));
@@ -36,6 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pmp_settings_nonce'])
 $mapbox_token = get_option('pmp_mapbox_token', '');
 $map_style = get_option('pmp_map_style', 'dark-v11');
 $enable_mapbox = get_option('pmp_enable_mapbox', '0');
+
+// Branding settings
+$map_label = get_option('pmp_map_label', 'Project Map');
+$logo_image = get_option('pmp_logo_image', '');
 
 // Color customization settings
 $header_bg_color = get_option('pmp_header_bg_color', '#1d1d1d');
@@ -113,6 +121,40 @@ $map_styles = ($enable_mapbox == '1') ? $mapbox_styles : $osm_styles;
                     <?php _e('The map will fall back to OpenStreetMap if no token is provided.', 'project-map-plugin'); ?>
                 </div>
             <?php endif; ?>
+        </div>
+
+        <!-- Branding Settings -->
+        <div class="pmp-settings-section">
+            <h2><span class="dashicons dashicons-format-image"></span> <?php _e('Branding', 'project-map-plugin'); ?></h2>
+
+            <div class="pmp-form-row">
+                <div class="pmp-form-field">
+                    <label for="map_label"><?php _e('Map Header Label', 'project-map-plugin'); ?></label>
+                    <input type="text" name="map_label" id="map_label" class="regular-text"
+                           value="<?php echo esc_attr($map_label); ?>"
+                           placeholder="Project Map">
+                    <p class="description"><?php _e('Text displayed in the map header and loading screen.', 'project-map-plugin'); ?></p>
+                </div>
+
+                <div class="pmp-form-field">
+                    <label for="logo_image"><?php _e('Logo Image', 'project-map-plugin'); ?></label>
+                    <div class="pmp-logo-upload-wrap">
+                        <input type="hidden" name="logo_image" id="logo_image" value="<?php echo esc_attr($logo_image); ?>">
+                        <div class="pmp-logo-preview" id="pmp-logo-preview">
+                            <?php if ($logo_image): ?>
+                                <img src="<?php echo esc_url($logo_image); ?>" alt="Logo">
+                            <?php else: ?>
+                                <span class="pmp-logo-default">🌍</span>
+                            <?php endif; ?>
+                        </div>
+                        <button type="button" class="button" id="pmp-upload-logo"><?php _e('Upload Logo', 'project-map-plugin'); ?></button>
+                        <?php if ($logo_image): ?>
+                            <button type="button" class="button pmp-remove-logo" id="pmp-remove-logo"><?php _e('Remove', 'project-map-plugin'); ?></button>
+                        <?php endif; ?>
+                    </div>
+                    <p class="description"><?php _e('Upload a logo image for the header and loading screen. Default: 🌍 emoji.', 'project-map-plugin'); ?></p>
+                </div>
+            </div>
         </div>
 
         <!-- Map Display Settings -->
@@ -392,6 +434,40 @@ $map_styles = ($enable_mapbox == '1') ? $mapbox_styles : $osm_styles;
     letter-spacing: 0.5px;
 }
 
+/* Logo Upload */
+.pmp-logo-upload-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.pmp-logo-preview {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f9f9f9;
+}
+
+.pmp-logo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.pmp-logo-default {
+    font-size: 28px;
+}
+
+.pmp-remove-logo {
+    color: #b32d2e !important;
+}
+
 @media (max-width: 600px) {
     .pmp-preview-container {
         flex-direction: column;
@@ -464,5 +540,40 @@ jQuery(document).ready(function($) {
 
     // Update on toggle change
     $('#enable_mapbox').on('change', toggleMapboxFields);
+
+    // Logo upload via WordPress Media Library
+    var logoFrame;
+    $('#pmp-upload-logo').on('click', function(e) {
+        e.preventDefault();
+        if (logoFrame) {
+            logoFrame.open();
+            return;
+        }
+        logoFrame = wp.media({
+            title: '<?php echo esc_js(__('Select Logo Image', 'project-map-plugin')); ?>',
+            button: { text: '<?php echo esc_js(__('Use as Logo', 'project-map-plugin')); ?>' },
+            multiple: false
+        });
+        logoFrame.on('select', function() {
+            var attachment = logoFrame.state().get('selection').first().toJSON();
+            $('#logo_image').val(attachment.url);
+            $('#pmp-logo-preview').html('<img src="' + attachment.url + '" alt="Logo">');
+            if (!$('#pmp-remove-logo').length) {
+                $('<button type="button" class="button pmp-remove-logo" id="pmp-remove-logo"><?php echo esc_js(__('Remove', 'project-map-plugin')); ?></button>').insertAfter('#pmp-upload-logo');
+                bindRemoveLogo();
+            }
+        });
+        logoFrame.open();
+    });
+
+    function bindRemoveLogo() {
+        $(document).on('click', '#pmp-remove-logo', function(e) {
+            e.preventDefault();
+            $('#logo_image').val('');
+            $('#pmp-logo-preview').html('<span class="pmp-logo-default">🌍</span>');
+            $(this).remove();
+        });
+    }
+    bindRemoveLogo();
 });
 </script>
