@@ -735,36 +735,47 @@ class ProjectMapPlugin
             add_filter('template_include', array($this, 'single_project_template'));
 
             // Set page title to "Completed [Project Type] - [Village Name]"
-            // pre_get_document_title has highest priority - returns full title directly
-            add_filter('pre_get_document_title', function () use ($project) {
-                $project_type = $project->project_type_name ?: __('Project', 'project-map-plugin');
-                return sprintf(
-                    __('Completed %s - %s', 'project-map-plugin'),
-                    $project_type,
-                    $project->village_name
-                );
-            });
+            $pmp_page_title = sprintf(
+                __('Completed %s - %s', 'project-map-plugin'),
+                $project->project_type_name ?: __('Project', 'project-map-plugin'),
+                $project->village_name
+            );
 
-            add_filter('document_title_parts', function ($title_parts) use ($project) {
-                $project_type = $project->project_type_name ?: __('Project', 'project-map-plugin');
-                $title_parts['title'] = sprintf(
-                    __('Completed %s - %s', 'project-map-plugin'),
-                    $project_type,
-                    $project->village_name
-                );
+            // pre_get_document_title - highest priority in core WordPress
+            add_filter('pre_get_document_title', function () use ($pmp_page_title) {
+                return $pmp_page_title;
+            }, 999);
+
+            add_filter('document_title_parts', function ($title_parts) use ($pmp_page_title) {
+                $title_parts['title'] = $pmp_page_title;
                 unset($title_parts['tagline']);
                 return $title_parts;
-            });
+            }, 999);
 
-            // Also filter wp_title for themes that use it
-            add_filter('wp_title', function ($title) use ($project) {
-                $project_type = $project->project_type_name ?: __('Project', 'project-map-plugin');
-                return sprintf(
-                    __('Completed %s - %s', 'project-map-plugin'),
-                    $project_type,
-                    $project->village_name
-                );
-            }, 10, 1);
+            // wp_title for older themes
+            add_filter('wp_title', function () use ($pmp_page_title) {
+                return $pmp_page_title;
+            }, 999);
+
+            // Yoast SEO compatibility
+            add_filter('wpseo_title', function () use ($pmp_page_title) {
+                return $pmp_page_title;
+            }, 999);
+
+            // Rank Math SEO compatibility
+            add_filter('rank_math/frontend/title', function () use ($pmp_page_title) {
+                return $pmp_page_title;
+            }, 999);
+
+            // All in One SEO compatibility
+            add_filter('aioseo_title', function () use ($pmp_page_title) {
+                return $pmp_page_title;
+            }, 999);
+
+            // JS fallback - works even with page caching
+            add_action('wp_head', function () use ($pmp_page_title) {
+                echo '<script>document.title = ' . json_encode($pmp_page_title) . ';</script>' . "\n";
+            }, 1);
 
             // Add body class
             add_filter('body_class', function ($classes) {
