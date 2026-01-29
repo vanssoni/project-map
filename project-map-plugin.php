@@ -735,6 +735,16 @@ class ProjectMapPlugin
             add_filter('template_include', array($this, 'single_project_template'));
 
             // Set page title to "Completed [Project Type] - [Village Name]"
+            // pre_get_document_title has highest priority - returns full title directly
+            add_filter('pre_get_document_title', function () use ($project) {
+                $project_type = $project->project_type_name ?: __('Project', 'project-map-plugin');
+                return sprintf(
+                    __('Completed %s - %s', 'project-map-plugin'),
+                    $project_type,
+                    $project->village_name
+                );
+            });
+
             add_filter('document_title_parts', function ($title_parts) use ($project) {
                 $project_type = $project->project_type_name ?: __('Project', 'project-map-plugin');
                 $title_parts['title'] = sprintf(
@@ -742,6 +752,7 @@ class ProjectMapPlugin
                     $project_type,
                     $project->village_name
                 );
+                unset($title_parts['tagline']);
                 return $title_parts;
             });
 
