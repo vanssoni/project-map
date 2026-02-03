@@ -864,8 +864,9 @@ class ProjectMapPlugin
         }
 
         if ($search) {
-            $where .= " AND (p.village_name LIKE %s OR p.country LIKE %s)";
+            $where .= " AND (p.village_name LIKE %s OR p.country LIKE %s OR p.project_number LIKE %s)";
             $search_term = '%' . $wpdb->esc_like($search) . '%';
+            $params[] = $search_term;
             $params[] = $search_term;
             $params[] = $search_term;
         }

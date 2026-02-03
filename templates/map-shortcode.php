@@ -145,7 +145,7 @@ $button_text_color = get_option('pmp_button_text_color', '#2d2d2d');
         <?php if ($show_search): ?>
         <!-- Search Bar -->
         <div class="pmp-search-bar" id="pmp-search-bar">
-            <input type="text" id="pmp-search-input" placeholder="<?php _e('Search projects by name or location...', 'project-map-plugin'); ?>" autocomplete="off">
+            <input type="text" id="pmp-search-input" placeholder="<?php _e('Search projects by village name, project number or location...', 'project-map-plugin'); ?>" autocomplete="off">
             <button class="pmp-search-close" id="pmp-search-close">✕</button>
         </div>
         <?php endif; ?>
